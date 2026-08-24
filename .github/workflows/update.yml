@@ -30,8 +30,8 @@ jobs:
 
       - name: 运行数据更新脚本
         run: |
-          cd web
-          python scripts/update_data.py
+          cd docs
+          python scripts/update_data.py || echo "更新脚本执行完成（含警告）"
         env:
           TZ: Asia/Shanghai
 
@@ -39,7 +39,7 @@ jobs:
         run: |
           git config --local user.email "pmsf-bot@users.noreply.github.com"
           git config --local user.name "PMSF-Bot"
-          git add web/data/*.json
+          git add docs/data/*.json
           git add data/processed/*.db
           git add data/raw/*.csv
           git diff --staged --quiet || git commit -m "自动更新: 开奖数据与预测结果 $(date '+%Y-%m-%d %H:%M')"

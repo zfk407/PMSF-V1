@@ -18,10 +18,12 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 
-# 项目根目录（web的上一级）
+# 项目根目录（docs的上一级）
 WEB_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT = os.path.dirname(WEB_DIR)
 sys.path.insert(0, PROJECT_ROOT)
+# 切换到项目根目录，确保config中的相对路径正确解析
+os.chdir(PROJECT_ROOT)
 
 from src.layer1_data.database import DltDatabase
 from src.layer1_data.fetcher import DltDataFetcher
@@ -206,6 +208,48 @@ def generate_runtime_json(logs, last_issue=None):
     }
 
 
+def review_pending_prediction(db, latest_issue, latest_row):
+    """检查并复盘上一期的待复盘预测"""
+    pending_path = os.path.join(WEB_DIR, "data", "pending_prediction.json")
+    if not os.path.exists(pending_path):
+        return 0, "无待复盘预测"
+
+    with open(pending_path, "r", encoding="utf-8") as f:
+        pending = json.load(f)
+
+    target_issue = str(pending.get("target_issue", ""))
+    if target_issue != latest_issue:
+        return 0, f"待复盘期号 {target_issue} 与最新期号 {latest_issue} 不匹配，跳过"
+
+    actual_front = [int(latest_row[f"front{i}"]) for i in range(1, 6)]
+    actual_back = [int(latest_row[f"back{i}"]) for i in range(1, 3)]
+
+    conn = db._get_conn()
+    reviewed = 0
+    for g in pending.get("groups", []):
+        pred_front = g.get("front", [])
+        pred_back = g.get("back", [])
+        fh = len(set(pred_front) & set(actual_front))
+        bh = len(set(pred_back) & set(actual_back))
+        conn.execute("""INSERT OR IGNORE INTO backtest_results 
+            (issue, group_label, predicted_front, predicted_back, actual_front, actual_back, front_hit, back_hit, coverage, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (latest_issue, g.get("label", ""),
+             ",".join(map(str, pred_front)),
+             ",".join(map(str, pred_back)),
+             ",".join(map(str, actual_front)),
+             ",".join(map(str, actual_back)),
+             fh, bh, fh + bh,
+             datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        reviewed += 1
+    conn.commit()
+    conn.close()
+
+    # 复盘完成后删除待复盘文件
+    os.remove(pending_path)
+    return reviewed, f"复盘完成：{reviewed}组，前区命中最高 {max([len(set(g['front']) & set(actual_front)) for g in pending.get('groups', [])] or [0])}/5"
+
+
 def run_update():
     """执行完整更新流程"""
     print("=" * 60)
@@ -226,7 +270,7 @@ def run_update():
         print(f"  [{status.upper()}] {action}: {detail}")
 
     # 1. 加载/抓取数据
-    print("\n[1/6] 数据获取...")
+    print("\n[1/7] 数据获取...")
     db = DltDatabase(config["data"]["db_path"])
     fetcher = DltDataFetcher(config["data"]["raw_dir"])
 
@@ -246,21 +290,28 @@ def run_update():
         return
 
     latest_issue = str(df["issue"].iloc[-1])
+    latest_row = df.iloc[-1]
 
-    # 2. 生成历史数据JSON
-    print("\n[2/6] 生成历史数据JSON...")
+    # 2. 复盘上一期预测
+    print("\n[2/7] 复盘上一期预测...")
+    reviewed, review_msg = review_pending_prediction(db, latest_issue, latest_row)
+    log("复盘分析", review_msg)
+
+    # 3. 生成历史数据JSON
+    print("\n[3/7] 生成历史数据JSON...")
     history_json = generate_history_json(df)
     save_json(history_json, "history.json")
     log("历史数据", f"生成 {len(history_json)} 期历史记录")
 
-    # 3. 生成统计分析JSON
-    print("\n[3/6] 生成统计分析JSON...")
+    # 4. 生成统计分析JSON
+    print("\n[4/7] 生成统计分析JSON...")
     stats_json = generate_stats_json(df, config)
     save_json(stats_json, "stats.json")
     log("统计分析", "生成号码频率、分布、关系网络等统计")
 
-    # 4. 运行系统预测
-    print("\n[4/6] 运行PMSF系统预测...")
+    # 5. 运行系统预测
+    print("\n[5/7] 运行PMSF系统预测...")
+    output = None
     try:
         sys.path.insert(0, PROJECT_ROOT)
         from main import PMSFSystem
@@ -273,20 +324,22 @@ def run_update():
         system.run_optimization_layer()
         output = system.generate_output()
         save_json(output, "latest_prediction.json")
+        # 同时保存为待复盘预测（供下一期开奖后复盘）
+        save_json(output, "pending_prediction.json")
         log("系统预测", f"生成 {output.get('target_issue', 'N/A')} 期4组推荐")
     except Exception as e:
         log("系统预测", f"预测失败: {e}", "error")
         import traceback
         traceback.print_exc()
 
-    # 5. 生成预测记录JSON
-    print("\n[5/6] 生成预测记录JSON...")
+    # 6. 生成预测记录JSON
+    print("\n[6/7] 生成预测记录JSON...")
     predictions_json = generate_predictions_json(db)
     save_json(predictions_json, "predictions.json")
     log("预测记录", f"生成 {len(predictions_json)} 条预测复盘记录")
 
-    # 6. 生成运行时信息JSON
-    print("\n[6/6] 生成运行时信息...")
+    # 7. 生成运行时信息JSON
+    print("\n[7/7] 生成运行时信息...")
     runtime_json = generate_runtime_json(logs, latest_issue)
     save_json(runtime_json, "runtime.json")
     log("运行时", "更新运行日志和状态")

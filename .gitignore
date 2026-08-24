@@ -31,8 +31,17 @@ Thumbs.db
 
 # CatBoost训练临时文件
 catboost_info/
+docs/catboost_info/
 
-# 大文件（如果有）
+# 日志目录
+logs/
+
+# 空的旧目录
+web/
+
+# 数据库文件（可由CSV重建）
 *.db
 *.sqlite
 *.sqlite3
+# 保留初始数据库便于首次运行
+!data/processed/*.db
