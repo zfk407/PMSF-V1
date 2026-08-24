@@ -127,6 +127,23 @@ body::before {
   animation: pulse 2s infinite;
 }
 
+.logout-btn {
+  padding: 8px 16px;
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  color: var(--accent-red);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: rgba(239,68,68,0.25);
+  border-color: rgba(239,68,68,0.5);
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }

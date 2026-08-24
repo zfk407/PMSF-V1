@@ -64,7 +64,7 @@ class OutputGenerator:
 
         # 为每组分配标签并生成详情
         output = {
-            "system": "PMSF-V1",
+            "system": "ZHIHUI-DLT",
             "version": "1.0",
             "target_issue": target_issue,
             "generate_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),

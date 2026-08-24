@@ -3,263 +3,238 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PMSF-V1 彭湃大乐透多尺度状态融合系统</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <title>ZHIHUI-DLT 登录</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: #0a0e1a;
+      color: #e8ecf4;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(59,130,246,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(139,92,246,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(6,182,212,0.06) 0%, transparent 60%);
+      animation: bgFloat 20s ease-in-out infinite;
+      z-index: 0;
+    }
+    @keyframes bgFloat {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(-2%, -2%) rotate(1deg); }
+    }
+    .login-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      padding: 48px 40px;
+      background: rgba(26, 34, 54, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid #2a3654;
+      border-radius: 16px;
+      box-shadow: 0 8px 48px rgba(0,0,0,0.5);
+      animation: fadeInUp 0.6s ease;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .logo-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 28px;
+      color: white;
+      box-shadow: 0 4px 24px rgba(59,130,246,0.4);
+    }
+    .logo h1 {
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #06b6d4, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 1px;
+    }
+    .logo p {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 6px;
+      letter-spacing: 0.5px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      background: #111827;
+      border: 1px solid #2a3654;
+      border-radius: 10px;
+      color: #e8ecf4;
+      font-size: 15px;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .form-group input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+    .form-group input::placeholder {
+      color: #475569;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .login-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(59,130,246,0.4);
+    }
+    .login-btn:active {
+      transform: translateY(0);
+    }
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .error-msg {
+      color: #ef4444;
+      font-size: 13px;
+      text-align: center;
+      margin-top: 16px;
+      min-height: 18px;
+      transition: opacity 0.2s;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 11px;
+      color: #475569;
+    }
+    .shake {
+      animation: shake 0.4s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+  </style>
 </head>
 <body>
-
-<!-- 顶部导航 -->
-<header class="header">
-  <div class="header-inner">
+  <div class="login-container" id="loginBox">
     <div class="logo">
-      <div class="logo-icon">P</div>
-      <div class="logo-text">
-        <h1>PMSF-V1 彭湃大乐透系统</h1>
-        <p>Multi-scale State Fusion · 多尺度状态融合智能筛选</p>
-      </div>
+      <div class="logo-icon">Z</div>
+      <h1>ZHIHUI-DLT</h1>
+      <p>大乐透多尺度状态融合智能筛选系统</p>
     </div>
-    <div class="header-right">
-      <div class="update-time">
-        <span class="dot"></span>
-        <span id="updateTime">数据更新中...</span>
+    <form id="loginForm" autocomplete="off">
+      <div class="form-group">
+        <label for="username">账号</label>
+        <input type="text" id="username" placeholder="请输入账号" autocomplete="off" required>
       </div>
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" id="password" placeholder="请输入密码" autocomplete="off" required>
+      </div>
+      <button type="submit" class="login-btn" id="loginBtn">登 录</button>
+      <div class="error-msg" id="errorMsg"></div>
+    </form>
+    <div class="footer">
+      ZHIHUI-DLT v1.0 · 授权访问
     </div>
   </div>
-  <nav class="nav-tabs" id="navTabs">
-    <button class="tab-btn active" data-tab="dashboard">📊 仪表盘</button>
-    <button class="tab-btn" data-tab="history">📋 历史数据</button>
-    <button class="tab-btn" data-tab="prediction">🔮 预测中心</button>
-    <button class="tab-btn" data-tab="model">🤖 模型介绍</button>
-    <button class="tab-btn" data-tab="report">📑 详细报告</button>
-    <button class="tab-btn" data-tab="runtime">⚙️ 系统运行</button>
-  </nav>
-</header>
 
-<!-- 主内容 -->
-<main class="main">
+  <script>
+    (function() {
+      const VALID_USER = 'zfk8888';
+      const VALID_PASS = 'zfk96939093';
+      const AUTH_KEY = 'zhihui_dlt_auth';
 
-  <!-- Tab1: 仪表盘 -->
-  <section class="tab-content active" id="tab-dashboard">
-    <div class="grid grid-4" style="margin-bottom:20px;">
-      <div class="stat-card">
-        <div class="stat-label">历史开奖期数</div>
-        <div class="stat-value" id="statTotalPeriods">--</div>
-        <div class="stat-sub" id="statDateRange">--</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">当前状态</div>
-        <div class="stat-value" id="statCurrentState" style="font-size:20px;">--</div>
-        <div class="stat-sub" id="statStateDuration">--</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">最新预测期号</div>
-        <div class="stat-value" id="statLatestIssue">--</div>
-        <div class="stat-sub">4组5+2推荐</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">预测累计中奖</div>
-        <div class="stat-value" id="statTotalPrize">--</div>
-        <div class="stat-sub" id="statHitRate">--</div>
-      </div>
-    </div>
+      // 已登录则直接跳转
+      if (sessionStorage.getItem(AUTH_KEY) === '1') {
+        window.location.replace('app.html');
+        return;
+      }
 
-    <div class="grid grid-2">
-      <div class="card">
-        <div class="card-title"><span class="icon">🔥</span> 前区号码热度分布（全部历史）</div>
-        <div class="chart-container" id="chartHotNumbers"></div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="icon">📈</span> 近期和值走势</div>
-        <div class="chart-container" id="chartSumTrend"></div>
-      </div>
-    </div>
+      const form = document.getElementById('loginForm');
+      const btn = document.getElementById('loginBtn');
+      const errorMsg = document.getElementById('errorMsg');
+      const loginBox = document.getElementById('loginBox');
 
-    <div class="grid grid-2">
-      <div class="card">
-        <div class="card-title"><span class="icon">🔄</span> 奇偶结构分布</div>
-        <div class="chart-container" id="chartOddEven"></div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="icon">🎯</span> 状态概率分布</div>
-        <div class="chart-container" id="chartStateProb"></div>
-      </div>
-    </div>
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const user = document.getElementById('username').value.trim();
+        const pass = document.getElementById('password').value.trim();
 
-    <div class="card">
-      <div class="card-title"><span class="icon">🎱</span> 最新4组推荐</div>
-      <div class="grid grid-4" id="latestPredictions"></div>
-    </div>
-  </section>
+        btn.disabled = true;
+        btn.textContent = '验证中...';
+        errorMsg.textContent = '';
 
-  <!-- Tab2: 历史数据 -->
-  <section class="tab-content" id="tab-history">
-    <div class="card">
-      <div class="card-title"><span class="icon">📊</span> 号码频率统计</div>
-      <div class="grid grid-2">
-        <div class="chart-container" id="chartFrontFreq"></div>
-        <div class="chart-container" id="chartBackFreq"></div>
-      </div>
-    </div>
+        setTimeout(function() {
+          if (user === VALID_USER && pass === VALID_PASS) {
+            sessionStorage.setItem(AUTH_KEY, '1');
+            sessionStorage.setItem('zhihui_login_time', new Date().toISOString());
+            btn.textContent = '登录成功';
+            window.location.replace('app.html');
+          } else {
+            errorMsg.textContent = '账号或密码错误，请重试';
+            loginBox.classList.add('shake');
+            setTimeout(function() { loginBox.classList.remove('shake'); }, 400);
+            btn.disabled = false;
+            btn.textContent = '登 录';
+            document.getElementById('password').value = '';
+            document.getElementById('password').focus();
+          }
+        }, 500);
+      });
 
-    <div class="grid grid-2">
-      <div class="card">
-        <div class="card-title"><span class="icon">📐</span> 和值分布</div>
-        <div class="chart-container" id="chartSumDist"></div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="icon">📏</span> 跨度分布</div>
-        <div class="chart-container" id="chartSpanDist"></div>
-      </div>
-    </div>
-
-    <div class="grid grid-2">
-      <div class="card">
-        <div class="card-title"><span class="icon">🔢</span> 大小结构分布</div>
-        <div class="chart-container" id="chartBigSmall"></div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="icon">🗺️</span> 四区分布</div>
-        <div class="chart-container" id="chartZone"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><span class="icon">📋</span> 历史开奖记录</div>
-      <div style="margin-bottom:12px;display:flex;gap:12px;align-items:center;">
-        <input type="text" id="searchIssue" placeholder="搜索期号..." style="padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);width:200px;">
-        <span style="font-size:12px;color:var(--text-muted);" id="historyCount"></span>
-      </div>
-      <div class="table-wrapper">
-        <table class="data-table" id="historyTable">
-          <thead>
-            <tr>
-              <th>期号</th><th>日期</th><th>前区</th><th>后区</th>
-              <th>和值</th><th>跨度</th><th>奇偶</th><th>大小</th><th>四区</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- Tab3: 预测中心 -->
-  <section class="tab-content" id="tab-prediction">
-    <div class="card">
-      <div class="card-title"><span class="icon">🎯</span> 最新预测 <span id="predIssueLabel" style="font-size:13px;color:var(--text-muted);font-weight:normal;margin-left:8px;"></span></div>
-      <div id="predictionDetail"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><span class="icon">🏆</span> 预测中奖台账</div>
-      <div class="table-wrapper">
-        <table class="data-table" id="prizeTable">
-          <thead>
-            <tr>
-              <th>期号</th><th>组别</th><th>预测前区</th><th>预测后区</th>
-              <th>实际前区</th><th>实际后区</th><th>前区命中</th><th>后区命中</th><th>奖项</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="grid grid-2">
-      <div class="card">
-        <div class="card-title"><span class="icon">📊</span> 中奖等级分布</div>
-        <div class="chart-container" id="chartPrizeDist"></div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="icon">📈</span> 各组命中率对比</div>
-        <div class="chart-container" id="chartGroupHit"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Tab4: 模型介绍 -->
-  <section class="tab-content" id="tab-model">
-    <div class="card">
-      <div class="card-title"><span class="icon">🏗️</span> 五层架构总览</div>
-      <div id="architecture"></div>
-    </div>
-
-    <div class="grid grid-2">
-      <div class="card">
-        <div class="card-title"><span class="icon">⚖️</span> 模型融合权重</div>
-        <div class="chart-container" id="chartFusionWeight"></div>
-      </div>
-      <div class="card">
-        <div class="card-title"><span class="icon">🔗</span> 号码关系网络（共现Top20）</div>
-        <div class="chart-container" id="chartRelation"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><span class="icon">🧠</span> 各模型详解</div>
-      <div id="modelDetails"></div>
-    </div>
-  </section>
-
-  <!-- Tab5: 详细报告 -->
-  <section class="tab-content" id="tab-report">
-    <div class="card">
-      <div class="card-title"><span class="icon">📑</span> PMSF-V1 详细报告</div>
-      <div class="report-content" id="reportContent">
-        <div class="loading"><div class="spinner"></div>报告加载中...</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Tab6: 系统运行 -->
-  <section class="tab-content" id="tab-runtime">
-    <div class="card">
-      <div class="card-title"><span class="icon">⚙️</span> 运行流程可视化</div>
-      <div id="runtimeFlow"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><span class="icon">🔄</span> 最新复盘分析</div>
-      <div id="reviewAnalysis"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><span class="icon">📝</span> 运行日志</div>
-      <div class="table-wrapper" style="max-height:400px;">
-        <table class="data-table" id="runtimeLog">
-          <thead><tr><th>时间</th><th>操作</th><th>详情</th><th>状态</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><span class="icon">🔧</span> 数据更新说明</div>
-      <div style="line-height:1.8;color:var(--text-secondary);font-size:14px;">
-        <p><strong>自动更新机制：</strong>系统通过 GitHub Actions 定时（每日北京时间 21:00 / 22:00 大乐透开奖后）自动执行以下流程：</p>
-        <ol style="margin-left:20px;margin-top:8px;">
-          <li>从500彩票网抓取最新开奖数据</li>
-          <li>对比上期推荐的4组，进行复盘分析（命中数、奖项等级）</li>
-          <li>更新中奖台账和统计指标</li>
-          <li>重新运行五层系统，优化模型参数</li>
-          <li>生成下一期4组推荐</li>
-          <li>更新所有JSON数据文件，自动部署到网站</li>
-        </ol>
-        <p style="margin-top:12px;"><strong>手动更新：</strong>在项目目录运行 <code>python scripts/update_data.py</code> 即可手动触发完整更新流程。</p>
-      </div>
-    </div>
-  </section>
-
-</main>
-
-<footer class="footer">
-  <p>PMSF-V1 彭湃大乐透多尺度状态融合系统 · Version 1.0</p>
-  <p style="margin-top:4px;">⚠️ 本系统基于历史数据统计分析，彩票开奖为独立随机事件，结果仅供参考，不构成投注建议。</p>
-</footer>
-
-<script src="js/data.js"></script>
-<script src="js/charts.js"></script>
-<script src="js/app.js"></script>
+      // 回车聚焦
+      document.getElementById('username').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          document.getElementById('password').focus();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

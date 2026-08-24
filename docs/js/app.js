@@ -5,6 +5,7 @@ const PMSFApp = {
   async init() {
     this.bindTabs();
     this.bindSearch();
+    this.bindLogout();
     window.addEventListener('resize', () => PMSFCharts.resizeAll());
 
     try {
@@ -36,6 +37,19 @@ const PMSFApp = {
     const input = document.getElementById('searchIssue');
     if (input) {
       input.addEventListener('input', () => this.filterHistory(input.value));
+    }
+  },
+
+  bindLogout() {
+    const btn = document.getElementById('logoutBtn');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        if (confirm('确定要退出登录吗？')) {
+          sessionStorage.removeItem('zhihui_dlt_auth');
+          sessionStorage.removeItem('zhihui_login_time');
+          window.location.replace('index.html');
+        }
+      });
     }
   },
 
