@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PMSF-V1 彭湃大乐透多尺度状态融合系统</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">P</div>
+      <div class="logo-text">
+        <h1>PMSF-V1 彭湃大乐透系统</h1>
+        <p>Multi-scale State Fusion · 多尺度状态融合智能筛选</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="update-time">
+        <span class="dot"></span>
+        <span id="updateTime">数据更新中...</span>
+      </div>
+    </div>
+  </div>
+  <nav class="nav-tabs" id="navTabs">
+    <button class="tab-btn active" data-tab="dashboard">📊 仪表盘</button>
+    <button class="tab-btn" data-tab="history">📋 历史数据</button>
+    <button class="tab-btn" data-tab="prediction">🔮 预测中心</button>
+    <button class="tab-btn" data-tab="model">🤖 模型介绍</button>
+    <button class="tab-btn" data-tab="report">📑 详细报告</button>
+    <button class="tab-btn" data-tab="runtime">⚙️ 系统运行</button>
+  </nav>
+</header>
+
+<!-- 主内容 -->
+<main class="main">
+
+  <!-- Tab1: 仪表盘 -->
+  <section class="tab-content active" id="tab-dashboard">
+    <div class="grid grid-4" style="margin-bottom:20px;">
+      <div class="stat-card">
+        <div class="stat-label">历史开奖期数</div>
+        <div class="stat-value" id="statTotalPeriods">--</div>
+        <div class="stat-sub" id="statDateRange">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">当前状态</div>
+        <div class="stat-value" id="statCurrentState" style="font-size:20px;">--</div>
+        <div class="stat-sub" id="statStateDuration">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">最新预测期号</div>
+        <div class="stat-value" id="statLatestIssue">--</div>
+        <div class="stat-sub">4组5+2推荐</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">预测累计中奖</div>
+        <div class="stat-value" id="statTotalPrize">--</div>
+        <div class="stat-sub" id="statHitRate">--</div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">🔥</span> 前区号码热度分布（全部历史）</div>
+        <div class="chart-container" id="chartHotNumbers"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📈</span> 近期和值走势</div>
+        <div class="chart-container" id="chartSumTrend"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">🔄</span> 奇偶结构分布</div>
+        <div class="chart-container" id="chartOddEven"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🎯</span> 状态概率分布</div>
+        <div class="chart-container" id="chartStateProb"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">🎱</span> 最新4组推荐</div>
+      <div class="grid grid-4" id="latestPredictions"></div>
+    </div>
+  </section>
+
+  <!-- Tab2: 历史数据 -->
+  <section class="tab-content" id="tab-history">
+    <div class="card">
+      <div class="card-title"><span class="icon">📊</span> 号码频率统计</div>
+      <div class="grid grid-2">
+        <div class="chart-container" id="chartFrontFreq"></div>
+        <div class="chart-container" id="chartBackFreq"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">📐</span> 和值分布</div>
+        <div class="chart-container" id="chartSumDist"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📏</span> 跨度分布</div>
+        <div class="chart-container" id="chartSpanDist"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">🔢</span> 大小结构分布</div>
+        <div class="chart-container" id="chartBigSmall"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🗺️</span> 四区分布</div>
+        <div class="chart-container" id="chartZone"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">📋</span> 历史开奖记录</div>
+      <div style="margin-bottom:12px;display:flex;gap:12px;align-items:center;">
+        <input type="text" id="searchIssue" placeholder="搜索期号..." style="padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);width:200px;">
+        <span style="font-size:12px;color:var(--text-muted);" id="historyCount"></span>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table" id="historyTable">
+          <thead>
+            <tr>
+              <th>期号</th><th>日期</th><th>前区</th><th>后区</th>
+              <th>和值</th><th>跨度</th><th>奇偶</th><th>大小</th><th>四区</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tab3: 预测中心 -->
+  <section class="tab-content" id="tab-prediction">
+    <div class="card">
+      <div class="card-title"><span class="icon">🎯</span> 最新预测 <span id="predIssueLabel" style="font-size:13px;color:var(--text-muted);font-weight:normal;margin-left:8px;"></span></div>
+      <div id="predictionDetail"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">🏆</span> 预测中奖台账</div>
+      <div class="table-wrapper">
+        <table class="data-table" id="prizeTable">
+          <thead>
+            <tr>
+              <th>期号</th><th>组别</th><th>预测前区</th><th>预测后区</th>
+              <th>实际前区</th><th>实际后区</th><th>前区命中</th><th>后区命中</th><th>奖项</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">📊</span> 中奖等级分布</div>
+        <div class="chart-container" id="chartPrizeDist"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📈</span> 各组命中率对比</div>
+        <div class="chart-container" id="chartGroupHit"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tab4: 模型介绍 -->
+  <section class="tab-content" id="tab-model">
+    <div class="card">
+      <div class="card-title"><span class="icon">🏗️</span> 五层架构总览</div>
+      <div id="architecture"></div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">⚖️</span> 模型融合权重</div>
+        <div class="chart-container" id="chartFusionWeight"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🔗</span> 号码关系网络（共现Top20）</div>
+        <div class="chart-container" id="chartRelation"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">🧠</span> 各模型详解</div>
+      <div id="modelDetails"></div>
+    </div>
+  </section>
+
+  <!-- Tab5: 详细报告 -->
+  <section class="tab-content" id="tab-report">
+    <div class="card">
+      <div class="card-title"><span class="icon">📑</span> PMSF-V1 详细报告</div>
+      <div class="report-content" id="reportContent">
+        <div class="loading"><div class="spinner"></div>报告加载中...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tab6: 系统运行 -->
+  <section class="tab-content" id="tab-runtime">
+    <div class="card">
+      <div class="card-title"><span class="icon">⚙️</span> 运行流程可视化</div>
+      <div id="runtimeFlow"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">🔄</span> 最新复盘分析</div>
+      <div id="reviewAnalysis"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">📝</span> 运行日志</div>
+      <div class="table-wrapper" style="max-height:400px;">
+        <table class="data-table" id="runtimeLog">
+          <thead><tr><th>时间</th><th>操作</th><th>详情</th><th>状态</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">🔧</span> 数据更新说明</div>
+      <div style="line-height:1.8;color:var(--text-secondary);font-size:14px;">
+        <p><strong>自动更新机制：</strong>系统通过 GitHub Actions 定时（每日北京时间 21:00 / 22:00 大乐透开奖后）自动执行以下流程：</p>
+        <ol style="margin-left:20px;margin-top:8px;">
+          <li>从500彩票网抓取最新开奖数据</li>
+          <li>对比上期推荐的4组，进行复盘分析（命中数、奖项等级）</li>
+          <li>更新中奖台账和统计指标</li>
+          <li>重新运行五层系统，优化模型参数</li>
+          <li>生成下一期4组推荐</li>
+          <li>更新所有JSON数据文件，自动部署到网站</li>
+        </ol>
+        <p style="margin-top:12px;"><strong>手动更新：</strong>在项目目录运行 <code>python scripts/update_data.py</code> 即可手动触发完整更新流程。</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>PMSF-V1 彭湃大乐透多尺度状态融合系统 · Version 1.0</p>
+  <p style="margin-top:4px;">⚠️ 本系统基于历史数据统计分析，彩票开奖为独立随机事件，结果仅供参考，不构成投注建议。</p>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

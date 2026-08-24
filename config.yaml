@@ -1,0 +1,134 @@
+# ============================================================
+# PMSF-V1 彭湃大乐透多尺度状态融合系统 - 全局配置
+# ============================================================
+
+system:
+  name: "PMSF-V1"
+  version: "1.0"
+  description: "彭湃大乐透多尺度状态融合智能筛选系统"
+  random_seed: 20260824
+
+# ---------- 数据配置 ----------
+data:
+  db_path: "data/processed/pmsf_dlt.db"
+  raw_dir: "data/raw"
+  # 大乐透参数
+  front_range: [1, 35]      # 前区 01-35
+  front_count: 5             # 前区选5个
+  back_range: [1, 12]       # 后区 01-12
+  back_count: 2              # 后区选2个
+  # 四区划分
+  zones:
+    zone1: [1, 9]
+    zone2: [10, 18]
+    zone3: [19, 27]
+    zone4: [28, 35]
+
+# ---------- 第一层：数据特征 ----------
+features:
+  window_short: 5      # 短期窗口
+  window_mid: 10       # 中期窗口
+  window_long: 30      # 长期窗口
+  hot_threshold: 0.6   # 热号阈值
+  cold_threshold: 0.3  # 冷号阈值
+
+# ---------- 第二层：彭湃规则 ----------
+rules:
+  dual_line:
+    enabled: true
+    single_line: "odd"    # 奇数期为单线
+    double_line: "even"   # 偶数期为双线
+  three_states:
+    state_a: "纠缠热态"
+    state_b: "终止冷态"
+    state_c: "拓展回补态"
+    state_duration_mean: 5  # 状态平均持续期数
+
+# ---------- 第三层：状态识别 ----------
+state_models:
+  hmm:
+    n_components: 3
+    covariance_type: "full"
+    n_iter: 200
+  hsmm:
+    n_states: 3
+    max_duration: 15
+  markov_switching:
+    n_regimes: 3
+
+# ---------- 第四层：概率模型 ----------
+probability_models:
+  xgboost:
+    n_estimators: 300
+    max_depth: 6
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+  catboost:
+    iterations: 300
+    depth: 6
+    learning_rate: 0.05
+    verbose: false
+  tft:
+    hidden_size: 64
+    num_heads: 4
+    num_layers: 2
+    dropout: 0.1
+  gnn:
+    hidden_dim: 64
+    num_layers: 3
+  copula:
+    family: "gaussian"
+  # 融合权重（初始值，回测后动态调整）
+  fusion_weights:
+    xgboost: 0.25
+    catboost: 0.20
+    gnn: 0.15
+    tft: 0.15
+    hsmm: 0.10
+    bayesian: 0.10
+    pengpai_rule: 0.05
+
+# ---------- 第五层：组合优化 ----------
+optimization:
+  monte_carlo:
+    n_simulations: 1000000   # 蒙特卡洛模拟次数
+    n_candidates: 10000       # 保留候选数
+  structure_filter:
+    odd_even_allowed: [[2,3],[3,2],[1,4],[4,1]]  # 允许的奇偶结构
+    big_small_allowed: [[2,3],[3,2],[1,4],[4,1]] # 允许的大小结构
+    min_zone_coverage: 2      # 最少覆盖区数
+    sum_range: [70, 130]      # 前区和值范围
+    span_range: [15, 34]      # 前区跨度范围
+  genetic_algorithm:
+    population_size: 500
+    generations: 100
+    mutation_rate: 0.1
+    crossover_rate: 0.8
+    elite_size: 20
+  risk_control:
+    max_repeat_with_history: 3  # 与历史最多重复3个号
+    min_diversity: 0.3           # 组间最小多样性
+
+# ---------- 回测配置 ----------
+backtest:
+  method: "walk_forward"
+  train_min_size: 500       # 最小训练集
+  step_size: 1               # 滚动步长
+  metrics:
+    - "coverage"
+    - "top_k_hit"
+    - "structure_hit"
+    - "state_hit"
+  top_k: 10                  # Top-K命中率的K值
+
+# ---------- 输出配置 ----------
+output:
+  n_groups: 4                # 输出4组
+  groups:
+    A: "模型共识组"
+    B: "彭湃强化组"
+    C: "冷态拓展组"
+    D: "探索组"
+  result_dir: "results"
+  log_dir: "logs"

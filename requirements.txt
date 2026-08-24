@@ -1,0 +1,18 @@
+# PMSF-V1 核心依赖
+numpy>=1.26.0
+pandas>=2.1.0
+scipy>=1.11.0
+scikit-learn>=1.3.0
+xgboost>=2.0.0
+catboost>=1.2.0
+torch>=2.1.0
+PyYAML>=6.0
+tqdm>=4.66.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+hmmlearn>=0.3.0
+networkx>=3.2.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+joblib>=1.3.0
