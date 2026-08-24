@@ -253,7 +253,7 @@ def review_pending_prediction(db, latest_issue, latest_row):
 def run_update():
     """执行完整更新流程"""
     print("=" * 60)
-    print("  PMSF-V1 Web 数据更新")
+    print("  ZHIHUI-DLT Web 数据更新")
     print("=" * 60)
 
     config = load_config()

@@ -44,11 +44,9 @@ const PMSFApp = {
     const btn = document.getElementById('logoutBtn');
     if (btn) {
       btn.addEventListener('click', () => {
-        if (confirm('确定要退出登录吗？')) {
-          sessionStorage.removeItem('zhihui_dlt_auth');
-          sessionStorage.removeItem('zhihui_login_time');
-          window.location.replace('index.html');
-        }
+        sessionStorage.removeItem('zhihui_dlt_auth');
+        sessionStorage.removeItem('zhihui_login_time');
+        window.location.replace('index.html');
       });
     }
   },
@@ -320,9 +318,50 @@ const PMSFApp = {
     if (!el) return;
     if (PMSFData.report && PMSFData.report.content) {
       el.innerHTML = PMSFData.report.content;
+      // 动态注入最新预测数据
+      this.injectReportLatestPrediction();
     } else {
       el.innerHTML = '<div class="loading"><div class="spinner"></div>报告数据加载中...</div>';
     }
+  },
+
+  injectReportLatestPrediction() {
+    const container = document.getElementById('report-latest-prediction');
+    if (!container || !PMSFData.latest) return;
+    const d = PMSFData.latest;
+    const cs = d.current_state || {};
+    const probs = cs.probabilities || {};
+
+    let html = '';
+    html += `<p>• <strong>目标期号</strong>：${d.target_issue || '--'}</p>`;
+    html += `<p>• <strong>生成时间</strong>：${d.generate_time || '--'}</p>`;
+    html += `<p>• <strong>当前状态</strong>：${cs.state_name || cs.state || '--'} (${cs.state || ''})</p>`;
+    html += `<p>  - 纠缠热态(A): ${((probs.A || 0) * 100).toFixed(2)}%</p>`;
+    html += `<p>  - 终止冷态(B): ${((probs.B || 0) * 100).toFixed(2)}%</p>`;
+    html += `<p>  - 拓展回补态(C): ${((probs.C || 0) * 100).toFixed(2)}%</p>`;
+
+    // Top10号码
+    if (d.top10_numbers && d.top10_numbers.length) {
+      html += '<p><strong>概率Top10号码</strong>：</p>';
+      html += '<table><thead><tr><th>排名</th><th>号码</th><th>融合概率</th></tr></thead><tbody>';
+      d.top10_numbers.forEach((n, i) => {
+        html += `<tr><td>${i + 1}</td><td>${String(n.number).padStart(2, '0')}</td><td>${n.probability.toFixed(4)}</td></tr>`;
+      });
+      html += '</tbody></table>';
+    }
+
+    // 4组推荐
+    html += '<p><strong>4组推荐组合</strong>：</p>';
+    (d.groups || []).forEach(g => {
+      const struct = g.structure || {};
+      html += `<p><strong>【${g.label}组】${g.name}</strong></p>`;
+      html += `<p>• ${g.description || ''}</p>`;
+      html += `<p>• <strong>前区</strong>：${g.front.map(n => String(n).padStart(2, '0')).join(' ')}</p>`;
+      html += `<p>• <strong>后区</strong>：${g.back.map(n => String(n).padStart(2, '0')).join(' ')}</p>`;
+      html += `<p>• <strong>结构</strong>：${struct.odd_even || ''} | ${struct.big_small || ''} | 四区:${struct.zone || ''} | 和值:${struct.sum || ''} | 跨度:${struct.span || ''}</p>`;
+    });
+
+    container.innerHTML = html;
   },
 
   renderRuntime() {
