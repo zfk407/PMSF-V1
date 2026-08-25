@@ -336,6 +336,8 @@ const PMSFCharts = {
       }]
     };
     chart.setOption(option);
+  },
+
   // ========== 双色球图表 ==========
 
   // 九转连环图（彭湃双色球核心可视化）
