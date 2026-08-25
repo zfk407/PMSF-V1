@@ -261,21 +261,8 @@ class SsqAnalyzer:
             top_blue = max(blue_probs, key=blue_probs.get)
             candidates = [(top_reds, top_blue, 0.0)]
 
-        # A组：概率最大化 + 结构均衡（和值接近均值、三区/大小/奇偶均衡）
-        def structure_score(reds):
-            s = sum(reds)
-            sum_score = max(0.0, 1 - abs(s - 102) / 42.0)
-            z1 = sum(1 for n in reds if 1 <= n <= 11)
-            z2 = sum(1 for n in reds if 12 <= n <= 22)
-            z3 = sum(1 for n in reds if 23 <= n <= 33)
-            zone_balance = 1 - (abs(z1 - 2) + abs(z2 - 2) + abs(z3 - 2)) / 6.0
-            bigs = sum(1 for n in reds if n >= 17)
-            big_score = 1 - abs(bigs - 3) / 3.0
-            odds = sum(1 for n in reds if n % 2 == 1)
-            odd_score = 1 - abs(odds - 3) / 3.0
-            return 0.4 * sum_score + 0.25 * zone_balance + 0.2 * big_score + 0.15 * odd_score
-
-        best_a = max(candidates, key=lambda x: x[2] * (1 + 0.6 * structure_score(x[0])))
+        # A组：纯概率最大化（趋势驱动，不做结构美化，仅防病态结构）
+        best_a = max(candidates, key=lambda x: x[2])
 
         # B组：彭湃强化 - 主过渡号/热点组加权 + 与A组差异化
         def pengpai_bias_score(cand):

@@ -3,7 +3,7 @@
   "game": "ssq",
   "game_name": "双色球",
   "target_issue": "2026098",
-  "generate_time": "2026-08-25 16:28:23",
+  "generate_time": "2026-08-25 16:32:35",
   "current_state": {
     "state": "B",
     "state_name": "终止冷态",
@@ -144,19 +144,19 @@
       "front": [
         1,
         4,
+        6,
         13,
         22,
-        24,
-        31
+        24
       ],
       "blue": 1,
-      "fitness": 0.368534,
+      "fitness": 0.392152,
       "structure": {
-        "odd_even": "3奇3偶",
-        "big_small": "3大3小",
-        "zone": "2-2-2",
-        "sum": 95,
-        "span": 30,
+        "odd_even": "2奇4偶",
+        "big_small": "2大4小",
+        "zone": "3-2-1",
+        "sum": 70,
+        "span": 23,
         "passed": true
       }
     },
