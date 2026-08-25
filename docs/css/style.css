@@ -654,3 +654,45 @@ body::before {
 ::-webkit-scrollbar-track { background: var(--bg-primary); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* 模型融合号码徽章 */
+.num-chip {
+  display: inline-block;
+  min-width: 42px;
+  padding: 4px 8px;
+  margin: 2px;
+  background: rgba(33,150,243,0.12);
+  border: 1px solid rgba(33,150,243,0.35);
+  border-radius: 6px;
+  color: #64b5f6;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+}
+.num-chip em {
+  display: block;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.data-table th, .data-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.data-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  background: rgba(255,255,255,0.03);
+}
+.empty-hint {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 10px 0;
+}

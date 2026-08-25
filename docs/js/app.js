@@ -492,6 +492,39 @@ const PMSFApp = {
 
     // 规则信号
     this.renderSsqRules(s);
+
+    // 模型融合展示
+    this.renderSsqModelFusion(s);
+  },
+
+  renderSsqModelFusion(s) {
+    const el = document.getElementById('ssqModelFusion');
+    if (!el) return;
+    const comps = s.model_components || {};
+    const keys = Object.keys(comps);
+    if (!keys.length) {
+      el.innerHTML = '<div class="empty-hint">暂无模型融合数据</div>';
+      return;
+    }
+    const labels = {
+      pengpai: '彭湃先验', markov: '马尔可夫链', graph: '关系网络',
+      temporal: '时序EWMA', ml: 'XGBoost/CatBoost'
+    };
+    let html = '<table class="data-table"><thead><tr><th>模型</th><th>融合权重</th><th>Top3 号码</th></tr></thead><tbody>';
+    keys.forEach(k => {
+      const c = comps[k] || {};
+      const top3 = (c.top3 || []).map(p => {
+        const n = String(p[0]).padStart(2, '0');
+        const prob = (p[1] * 100).toFixed(1);
+        return `<span class="num-chip">${n}<em>${prob}%</em></span>`;
+      }).join(' ');
+      html += `<tr><td>${labels[k] || k}</td><td>${Math.round((c.weight || 0) * 100)}%</td><td>${top3 || '--'}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    html += '<div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:8px;">' +
+      '<p>彭湃规则作为先验约束（双线隔离/恒值配对/过渡号/纠缠/拓展/返点/蓝补红/尾数），' +
+      '叠加马尔可夫链、关系网络、时序EWMA、XGBoost/CatBoost 算法模型，按权重贝叶斯融合得到号码综合概率。</p></div>';
+    el.innerHTML = html;
   },
 
   renderSsqPrediction(s) {

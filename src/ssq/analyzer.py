@@ -1,11 +1,12 @@
 """
 双色球分析器
-将彭湃规则层 + 统计概率 + 组合优化融合，输出2组红6+蓝1推荐
-严谨科学：贝叶斯概率、Lift关联规则、指数衰减返点、结构统计过滤
+架构: 彭湃规则层(先验/状态空间) + 高阶算法模型层(Markov/Graph/Temporal/ML) + 贝叶斯融合 + 组合优化
+输出2组红6+蓝1推荐
 """
 import numpy as np
 from collections import defaultdict
 from .rules import SsqPengpaiRules
+from .models import SsqModelFusion
 
 
 class SsqAnalyzer:
@@ -15,86 +16,21 @@ class SsqAnalyzer:
 
     def __init__(self):
         self.rules = SsqPengpaiRules()
+        self.fusion = SsqModelFusion()
+        self._last_components = {}
+        self._last_weights = {}
 
     # ---------- 号码综合概率 ----------
     def compute_red_probs(self, df, target_issue: str) -> dict:
         """
-        红球综合概率 = 贝叶斯基础概率 * 彭湃规则修正
-        修正因子：配对组热度、过渡号、纠缠、拓展、返点、蓝补红、尾数
+        红球综合概率 = 贝叶斯融合
+        彭湃先验(双线/配对/过渡号/纠缠/拓展/返点/蓝补红/点位周期/尾数)
+        × 高阶模型(Markov链/关系网络/时序EWMA/XGBoost/CatBoost)融合
         """
-        analysis = self.rules.full_analysis(df, target_issue)
-        bayes = analysis["bayes_probs"]
-
-        # 各规则信号归一化
-        rebound = analysis["rebound"]
-        blue_boost = analysis["blue_boost"]
-        extension = analysis["extension"]
-        group_hot = analysis["group_hotness"]
-        entanglement = analysis["entanglement"]
-        hot_groups = set(analysis["hot_groups"])
-        main_trans = analysis["main_transition"]
-        sub_trans = set(analysis["sub_transitions"])
-        cycle_status = analysis["cycle_status"]
-        tail_law = analysis["tail_law"]
-
-        probs = {}
-        for num in range(1, 34):
-            base = bayes.get(num, 1 / 33)
-            factor = 1.0
-            g = self.rules.get_group(num)
-
-            # 1) 配对组热度加权
-            gh = group_hot.get(g, 1.0)
-            factor *= (0.6 + 0.4 * gh)
-
-            # 2) 组内纠缠（热点组加权）
-            if g in hot_groups:
-                factor *= 1.25
-            elif g in entanglement and entanglement[g]["is_hot"]:
-                factor *= 1.25
-
-            # 3) 组外拓展传导
-            ext = extension.get(g, 0)
-            factor *= (1 + 1.5 * max(0, ext))
-
-            # 4) 隔期返点
-            rb = rebound.get(num, 0)
-            factor *= (1 + 0.6 * rb)
-
-            # 5) 蓝补红
-            bb = blue_boost.get(num, 0)
-            factor *= (1 + 0.4 * bb)
-
-            # 6) 过渡号加权（主+副）
-            if num == main_trans:
-                factor *= 1.5
-            if num in sub_trans:
-                factor *= 1.3
-
-            # 7) 点位周期：走热雏形加权，暂停期降权
-            cs = cycle_status.get(g, "normal")
-            if cs == "hot":
-                factor *= 1.2
-            elif cs == "rest":
-                factor *= 0.75
-
-            # 8) 尾数定律：长期未出的尾数给与回补加权
-            tail = num % 10
-            cold = tail_law.get(tail, 100)
-            if cold > 15:  # 尾数超过15期未出，回补加权
-                factor *= (1 + 0.2 * min(cold / 30.0, 0.5))
-
-            # 9) 配对联动：配对号近期活跃则本号受益
-            pair = self.rules.get_pair(num)
-            if pair:
-                pair_bayes = bayes.get(pair, 1 / 33)
-                factor *= (1 + 0.3 * (pair_bayes / (1 / 33) - 1))
-
-            probs[num] = base * factor
-
-        # 归一化为概率分布
-        total = sum(probs.values())
-        return {k: v / total for k, v in probs.items()}
+        fused, components, weights = self.fusion.run(df, target_issue)
+        self._last_components = components
+        self._last_weights = weights
+        return fused
 
     # ---------- 蓝球概率 ----------
     def compute_blue_probs(self, df, target_issue: str, window: int = 100) -> dict:
@@ -348,6 +284,16 @@ class SsqAnalyzer:
         top_reds = sorted(red_probs.items(), key=lambda x: x[1], reverse=True)[:10]
         top_blues = sorted(blue_probs.items(), key=lambda x: x[1], reverse=True)[:5]
 
+        # 模型分量(融合详情)
+        components_info = {}
+        for k, comp in self._last_components.items():
+            if comp:
+                top3 = sorted(comp.items(), key=lambda x: x[1], reverse=True)[:3]
+                components_info[k] = {
+                    "top3": [[int(n), round(float(p), 4)] for n, p in top3],
+                    "weight": float(self._last_weights.get(k, 0))
+                }
+
         return {
             "system": "ZHIHUI-DLT",
             "game": "ssq",
@@ -374,5 +320,6 @@ class SsqAnalyzer:
             "groups": groups,
             "top10_reds": [{"number": int(n), "probability": round(float(p), 5)} for n, p in top_reds],
             "top5_blues": [{"number": int(n), "probability": round(float(p), 5)} for n, p in top_blues],
+            "model_components": components_info,
             "disclaimer": "本系统基于历史数据统计分析，双色球开奖为独立随机事件，结果仅供参考，不构成投注建议。"
         }
