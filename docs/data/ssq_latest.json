@@ -2,28 +2,30 @@
   "system": "ZHIHUI-DLT",
   "game": "ssq",
   "game_name": "双色球",
-  "target_issue": "26095",
-  "generate_time": "2026-08-25 11:59:55",
+  "target_issue": "2026098",
+  "generate_time": "2026-08-25 16:28:23",
   "current_state": {
     "state": "B",
     "state_name": "终止冷态",
     "probabilities": {
-      "A": 0.0,
-      "B": 0.9254,
-      "C": 0.0746
+      "A": 0.2743,
+      "B": 0.6499,
+      "C": 0.0758
     },
-    "hot_group_count": 0,
+    "hot_group_count": 1,
     "cold_tail_count": 0
   },
   "rules": {
-    "line": "single",
-    "main_transition": 31,
+    "line": "double",
+    "main_transition": 13,
     "sub_transitions": [
-      28,
-      29,
-      30
+      4,
+      5,
+      7
     ],
-    "hot_groups": [],
+    "hot_groups": [
+      8
+    ],
     "pair_groups": [
       [
         "01",
@@ -93,44 +95,44 @@
     "anchor_num": 33,
     "top_rebound": [
       [
-        29,
+        25,
         1.0
       ],
       [
-        32,
-        0.7744
+        4,
+        0.8702
       ],
       [
-        8,
-        0.7151
-      ],
-      [
-        11,
-        0.7151
+        22,
+        0.8036
       ],
       [
         15,
-        0.605
-      ],
-      [
-        23,
-        0.605
-      ],
-      [
-        33,
-        0.5737
-      ],
-      [
-        28,
-        0.5737
-      ],
-      [
-        5,
-        0.4856
+        0.6799
       ],
       [
         1,
-        0.4263
+        0.6447
+      ],
+      [
+        16,
+        0.6447
+      ],
+      [
+        26,
+        0.6447
+      ],
+      [
+        31,
+        0.6447
+      ],
+      [
+        6,
+        0.6133
+      ],
+      [
+        33,
+        0.4791
       ]
     ]
   },
@@ -141,20 +143,20 @@
       "description": "贝叶斯概率+彭湃规则综合评分最高，稳定性最强",
       "front": [
         1,
-        3,
-        11,
-        23,
-        28,
-        29
+        4,
+        13,
+        22,
+        24,
+        31
       ],
       "blue": 1,
-      "fitness": 0.366549,
+      "fitness": 0.368534,
       "structure": {
-        "odd_even": "5奇1偶",
+        "odd_even": "3奇3偶",
         "big_small": "3大3小",
-        "zone": "3-0-3",
+        "zone": "2-2-2",
         "sum": 95,
-        "span": 28,
+        "span": 30,
         "passed": true
       }
     },
@@ -163,87 +165,87 @@
       "name": "彭湃强化组",
       "description": "过渡号/配对/纠缠规则加权，与A组差异化",
       "front": [
-        3,
-        5,
+        4,
         6,
-        28,
-        29,
-        31
+        13,
+        17,
+        18,
+        30
       ],
-      "blue": 7,
-      "fitness": 0.280201,
+      "blue": 5,
+      "fitness": 0.342438,
       "structure": {
-        "odd_even": "4奇2偶",
+        "odd_even": "2奇4偶",
         "big_small": "3大3小",
-        "zone": "3-0-3",
-        "sum": 102,
-        "span": 28,
+        "zone": "2-3-1",
+        "sum": 88,
+        "span": 26,
         "passed": true
       }
     }
   ],
   "top10_reds": [
     {
-      "number": 11,
-      "probability": 0.06168
+      "number": 4,
+      "probability": 0.06762
     },
     {
-      "number": 28,
-      "probability": 0.05344
-    },
-    {
-      "number": 23,
-      "probability": 0.04843
-    },
-    {
-      "number": 1,
-      "probability": 0.0439
-    },
-    {
-      "number": 3,
-      "probability": 0.04188
-    },
-    {
-      "number": 8,
-      "probability": 0.04001
-    },
-    {
-      "number": 27,
-      "probability": 0.03991
-    },
-    {
-      "number": 25,
-      "probability": 0.03626
-    },
-    {
-      "number": 29,
-      "probability": 0.03408
+      "number": 13,
+      "probability": 0.05245
     },
     {
       "number": 6,
-      "probability": 0.03358
+      "probability": 0.04907
+    },
+    {
+      "number": 24,
+      "probability": 0.04629
+    },
+    {
+      "number": 1,
+      "probability": 0.04429
+    },
+    {
+      "number": 25,
+      "probability": 0.04354
+    },
+    {
+      "number": 5,
+      "probability": 0.04184
+    },
+    {
+      "number": 16,
+      "probability": 0.04163
+    },
+    {
+      "number": 15,
+      "probability": 0.03707
+    },
+    {
+      "number": 2,
+      "probability": 0.03617
     }
   ],
   "top5_blues": [
     {
       "number": 1,
-      "probability": 0.08314
+      "probability": 0.09883
+    },
+    {
+      "number": 4,
+      "probability": 0.08664
+    },
+    {
+      "number": 2,
+      "probability": 0.08317
     },
     {
       "number": 5,
-      "probability": 0.08314
+      "probability": 0.08005
     },
     {
-      "number": 12,
-      "probability": 0.08012
-    },
-    {
-      "number": 15,
-      "probability": 0.07859
-    },
-    {
-      "number": 9,
-      "probability": 0.07482
+      "number": 8,
+      "probability": 0.0768
     }
   ],
   "disclaimer": "本系统基于历史数据统计分析，双色球开奖为独立随机事件，结果仅供参考，不构成投注建议。"

@@ -193,9 +193,9 @@ class SsqAnalyzer:
         if covered < 2:
             return False
 
-        # 和值范围（双色球6红和值常见60-150，均值约102）
+        # 和值范围（双色球6红和值常见60-150，均值约102，主区间80-130）
         s = sum(reds)
-        if s < 55 or s > 165:
+        if s < 68 or s > 155:
             return False
 
         # 跨度（历史常见15-32，极端值过滤）
@@ -261,23 +261,36 @@ class SsqAnalyzer:
             top_blue = max(blue_probs, key=blue_probs.get)
             candidates = [(top_reds, top_blue, 0.0)]
 
-        # A组：概率最大化
-        best_a = max(candidates, key=lambda x: x[2])
+        # A组：概率最大化 + 结构均衡（和值接近均值、三区/大小/奇偶均衡）
+        def structure_score(reds):
+            s = sum(reds)
+            sum_score = max(0.0, 1 - abs(s - 102) / 42.0)
+            z1 = sum(1 for n in reds if 1 <= n <= 11)
+            z2 = sum(1 for n in reds if 12 <= n <= 22)
+            z3 = sum(1 for n in reds if 23 <= n <= 33)
+            zone_balance = 1 - (abs(z1 - 2) + abs(z2 - 2) + abs(z3 - 2)) / 6.0
+            bigs = sum(1 for n in reds if n >= 17)
+            big_score = 1 - abs(bigs - 3) / 3.0
+            odds = sum(1 for n in reds if n % 2 == 1)
+            odd_score = 1 - abs(odds - 3) / 3.0
+            return 0.4 * sum_score + 0.25 * zone_balance + 0.2 * big_score + 0.15 * odd_score
 
-        # B组：与A组差异化 + 规则匹配（过渡号/配对强化）
+        best_a = max(candidates, key=lambda x: x[2] * (1 + 0.6 * structure_score(x[0])))
+
+        # B组：彭湃强化 - 主过渡号/热点组加权 + 与A组差异化
         def pengpai_bias_score(cand):
             reds, blue, score = cand
             bias = 0.0
             for n in reds:
                 if n == main_trans:
-                    bias += 0.15
+                    bias += 0.25  # 主过渡号强加权
                 g = self.rules.get_group(n)
                 if g in hot_groups:
-                    bias += 0.08
+                    bias += 0.12  # 热点纠缠组
                 # 配对完整度：若配对号也在则加分
                 pair = self.rules.get_pair(n)
                 if pair and pair in reds:
-                    bias += 0.05
+                    bias += 0.06
             return score + bias
 
         # 差异化：与A组至少差3个红球
@@ -285,7 +298,10 @@ class SsqAnalyzer:
         candidates_b = [c for c in candidates if len(set(c[0]) & a_reds) <= 3]
         if not candidates_b:
             candidates_b = candidates
-        best_b = max(candidates_b, key=pengpai_bias_score)
+        # B组优先考虑包含主过渡号的候选（主过渡号枢纽特性）
+        candidates_b_main = [c for c in candidates_b if main_trans in c[0]]
+        pool_b = candidates_b_main if candidates_b_main else candidates_b
+        best_b = max(pool_b, key=pengpai_bias_score)
 
         # 结果结构
         result = []
