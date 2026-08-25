@@ -3,14 +3,14 @@
   "game": "ssq",
   "game_name": "双色球",
   "target_issue": "2026098",
-  "generate_time": "2026-08-25 16:32:35",
+  "generate_time": "2026-08-25 16:36:23",
   "current_state": {
     "state": "B",
     "state_name": "终止冷态",
     "probabilities": {
-      "A": 0.2743,
-      "B": 0.6499,
-      "C": 0.0758
+      "A": 0.2773,
+      "B": 0.6574,
+      "C": 0.0653
     },
     "hot_group_count": 1,
     "cold_tail_count": 0
@@ -19,12 +19,12 @@
     "line": "double",
     "main_transition": 13,
     "sub_transitions": [
+      3,
       4,
-      5,
-      7
+      23
     ],
     "hot_groups": [
-      8
+      4
     ],
     "pair_groups": [
       [
@@ -143,20 +143,20 @@
       "description": "贝叶斯概率+彭湃规则综合评分最高，稳定性最强",
       "front": [
         1,
+        2,
         4,
-        6,
-        13,
         22,
-        24
+        25,
+        30
       ],
       "blue": 1,
-      "fitness": 0.392152,
+      "fitness": 0.399871,
       "structure": {
         "odd_even": "2奇4偶",
-        "big_small": "2大4小",
-        "zone": "3-2-1",
-        "sum": 70,
-        "span": 23,
+        "big_small": "3大3小",
+        "zone": "3-1-2",
+        "sum": 84,
+        "span": 29,
         "passed": true
       }
     },
@@ -165,65 +165,65 @@
       "name": "彭湃强化组",
       "description": "过渡号/配对/纠缠规则加权，与A组差异化",
       "front": [
-        4,
-        6,
+        1,
+        9,
+        10,
         13,
-        17,
-        18,
-        30
+        24,
+        25
       ],
-      "blue": 5,
-      "fitness": 0.342438,
+      "blue": 15,
+      "fitness": 0.344054,
       "structure": {
-        "odd_even": "2奇4偶",
-        "big_small": "3大3小",
-        "zone": "2-3-1",
-        "sum": 88,
-        "span": 26,
+        "odd_even": "4奇2偶",
+        "big_small": "2大4小",
+        "zone": "3-1-2",
+        "sum": 82,
+        "span": 24,
         "passed": true
       }
     }
   ],
   "top10_reds": [
     {
-      "number": 4,
-      "probability": 0.06762
-    },
-    {
-      "number": 13,
-      "probability": 0.05245
-    },
-    {
-      "number": 6,
-      "probability": 0.04907
-    },
-    {
-      "number": 24,
-      "probability": 0.04629
-    },
-    {
       "number": 1,
-      "probability": 0.04429
+      "probability": 0.06875
+    },
+    {
+      "number": 4,
+      "probability": 0.05646
     },
     {
       "number": 25,
-      "probability": 0.04354
-    },
-    {
-      "number": 5,
-      "probability": 0.04184
-    },
-    {
-      "number": 16,
-      "probability": 0.04163
-    },
-    {
-      "number": 15,
-      "probability": 0.03707
+      "probability": 0.05567
     },
     {
       "number": 2,
-      "probability": 0.03617
+      "probability": 0.048
+    },
+    {
+      "number": 9,
+      "probability": 0.04778
+    },
+    {
+      "number": 22,
+      "probability": 0.04624
+    },
+    {
+      "number": 13,
+      "probability": 0.03933
+    },
+    {
+      "number": 6,
+      "probability": 0.03788
+    },
+    {
+      "number": 15,
+      "probability": 0.03635
+    },
+    {
+      "number": 3,
+      "probability": 0.03463
     }
   ],
   "top5_blues": [

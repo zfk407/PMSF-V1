@@ -144,12 +144,28 @@ class SsqPengpaiRules:
                 group_counts[g] += 1
         return dict(group_counts)
 
-    def get_cycle_status(self, df: pd.DataFrame, window: int = 15) -> dict:
-        """点位组周期状态：rest(暂停) / hot(走热雏形) / normal"""
-        cycles = self.compute_point_cycles(df, window)
+    def get_cycle_status(self, df: pd.DataFrame, window: int = 8,
+                         include_blue: bool = True) -> dict:
+        """
+        点位组周期状态：rest(暂停) / hot(走热雏形) / normal
+        短期窗口8期（每组期望约8*6/17≈2.8次），累计>=3次=走热雏形
+        include_blue=True 时蓝代红：蓝球等价于对应红球点位计数+1，改变组冷热周期
+        """
+        recent = df.tail(window)
+        group_counts = defaultdict(int)
+        for _, row in recent.iterrows():
+            for c in self.red_cols:
+                g = self.get_group(int(row[c]))
+                group_counts[g] += 1
+            if include_blue:
+                # 蓝代红：蓝球出号等价于对应红球点位计数+1
+                bp = self.blue_as_red(int(row["blue"]))
+                if bp:
+                    bg = self.get_group(bp)
+                    group_counts[bg] += 1
         status = {}
         for g in range(len(self.PAIR_GROUPS) + 1):  # 含独立组16
-            cnt = cycles.get(g, 0)
+            cnt = group_counts.get(g, 0)
             if cnt >= 3:
                 status[g] = "hot"      # 走热雏形
             elif cnt == 3:
@@ -395,24 +411,35 @@ class SsqPengpaiRules:
         return {g: round(c / expected, 4) for g, c in group_counts.items()}
 
     def full_analysis(self, df: pd.DataFrame, target_issue: str) -> dict:
-        """完整彭湃规则分析，输出结构化结果"""
+        """
+        完整彭湃规则分析，输出结构化结果
+        ★ 双线公理贯彻：除主/副过渡号判定外，所有红球信号只基于同线期历史，
+        禁止跨线混看（彭湃第一铁律）
+        """
         line = self.issue_parity(target_issue)
         main_trans = self.get_main_transition(line)
-        sub_trans = self.detect_sub_transition(df)
-        entanglement = self.compute_entanglement(df)
-        extension = self.compute_extension(df)
-        rebound = self.compute_rebound(df, target_issue)
-        blue_boost = self.compute_blue_boost(df)
-        tail_law = self.check_tail_law(df)
-        group_hot = self.compute_group_hotness(df)
-        cycle_status = self.get_cycle_status(df)
-        bayes = self.bayesian_number_probs(df)
+
+        # 同线期数据（预测只看同属性历史期数）
+        lines = self.split_lines(df)
+        line_df = lines.get(line, df)
+
+        # 全部信号基于同线期
+        sub_trans = self.detect_sub_transition(line_df)
+        entanglement = self.compute_entanglement(line_df)
+        extension = self.compute_extension(line_df)
+        rebound = self.compute_rebound(df, target_issue)  # 内部已按同线期
+        blue_boost = self.compute_blue_boost(line_df)
+        tail_law = self.check_tail_law(line_df)
+        group_hot = self.compute_group_hotness(line_df)
+        cycle_status = self.get_cycle_status(line_df, include_blue=True)  # 蓝代红计入周期
+        bayes = self.bayesian_number_probs(line_df)
 
         # 热点组列表
         hot_groups = [g for g, v in entanglement.items() if v["is_hot"]]
 
         return {
             "line": line,
+            "line_periods": int(len(line_df)),   # 同线期数
             "main_transition": main_trans,
             "sub_transitions": sub_trans,
             "entanglement": entanglement,
