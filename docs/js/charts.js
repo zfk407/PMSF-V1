@@ -336,5 +336,188 @@ const PMSFCharts = {
       }]
     };
     chart.setOption(option);
+  // ========== 双色球图表 ==========
+
+  // 九转连环图（彭湃双色球核心可视化）
+  renderJiuzhuan(ssq) {
+    const chart = this.init('chartJiuzhuan');
+    if (!chart || !ssq) return;
+
+    const rl = ssq.rules || {};
+    const pairs = rl.pair_groups || [];
+    const mainTrans = rl.main_transition;
+    const hotGroups = new Set(rl.hot_groups || []);
+    const state = (ssq.current_state || {}).state || 'B';
+    const stateColor = { A: '#f59e0b', B: '#ef4444', C: '#10b981' }[state] || '#06b6d4';
+
+    // 节点：33个红球（16组 x 2 + 1独立号）+ 中心过渡号
+    const nodes = [];
+    const edges = [];
+
+    // 外环：16组配对号
+    pairs.forEach((pair, gi) => {
+      const isHot = hotGroups.has(gi);
+      const color = isHot ? '#ef4444' : '#3b82f6';
+      const size = isHot ? 34 : 24;
+      [0, 1].forEach((k) => {
+        nodes.push({
+          id: 'n' + pair[k],
+          name: pair[k],
+          symbolSize: size,
+          x: null, y: null,
+          value: gi,
+          itemStyle: { color, borderColor: '#0f172a', borderWidth: 2 },
+          label: { show: true, fontSize: 11, color: '#e8ecf4' }
+        });
+      });
+      // 组内配对连线（恒值34）
+      edges.push({
+        source: 'n' + pair[0],
+        target: 'n' + pair[1],
+        lineStyle: { color: isHot ? 'rgba(239,68,68,0.7)' : 'rgba(59,130,246,0.4)', width: isHot ? 2 : 1 }
+      });
+    });
+
+    // 独立过渡号33
+    nodes.push({
+      id: 'n33', name: '33', symbolSize: 26,
+      value: 16,
+      itemStyle: { color: '#8b5cf6', borderColor: '#0f172a', borderWidth: 2 },
+      label: { show: true, fontSize: 11, color: '#e8ecf4' }
+    });
+
+    // 中心主过渡号
+    nodes.push({
+      id: 'center', name: String(mainTrans).padStart(2, '0'),
+      symbolSize: 46, x: 0, y: 0,
+      itemStyle: { color: stateColor, borderColor: '#fff', borderWidth: 2, shadowBlur: 20, shadowColor: stateColor },
+      label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#fff' }
+    });
+
+    // 中心到各节点连线：主过渡号与其配对/邻号的关系
+    if (mainTrans != null) {
+      const transStr = String(mainTrans).padStart(2, '0');
+      nodes.forEach(n => {
+        if (n.id === 'center') return;
+        const num = parseInt(n.id.replace('n', ''));
+        // 主过渡号与配对号强关联
+        if (num === (34 - mainTrans)) {
+          edges.push({ source: 'center', target: n.id, lineStyle: { color: stateColor, width: 3, curveness: 0.2, type: 'dashed' } });
+        }
+        // 主过渡号与邻号（左右甩）关联
+        if (Math.abs(num - mainTrans) === 1) {
+          edges.push({ source: 'center', target: n.id, lineStyle: { color: 'rgba(139,92,246,0.5)', width: 1.5, curveness: 0.2 } });
+        }
+      });
+    }
+
+    // 环形布局：手动计算外环坐标
+    const outerNodes = nodes.filter(n => n.id !== 'center');
+    const R = 150;
+    outerNodes.forEach((n, i) => {
+      const angle = (2 * Math.PI * i) / outerNodes.length - Math.PI / 2;
+      n.x = Math.cos(angle) * R;
+      n.y = Math.sin(angle) * R;
+    });
+
+    const option = {
+      backgroundColor: 'transparent',
+      tooltip: {
+        backgroundColor: 'rgba(17,24,39,0.95)',
+        borderColor: '#2a3654',
+        textStyle: { color: '#e8ecf4' },
+        formatter: (p) => {
+          if (p.dataType === 'node') {
+            const num = parseInt((p.data.id || '').replace('n', ''));
+            const isMain = p.data.id === 'center';
+            if (isMain) return `主过渡号 ${p.data.name}（${rl.line === 'single' ? '单期线固定' : '双期线固定'}）`;
+            return `红球 ${String(num).padStart(2, '0')} · 组${p.data.value}`;
+          }
+          return '';
+        }
+      },
+      series: [{
+        type: 'graph',
+        layout: 'none',
+        data: nodes,
+        links: edges,
+        roam: true,
+        draggable: true,
+        scaleLimit: { min: 0.6, max: 2 },
+        label: { position: 'inside', show: true },
+        lineStyle: { opacity: 0.6 }
+      }],
+      title: {
+        text: `${rl.line === 'single' ? '单期线' : '双期线'} · 主过渡号 ${String(mainTrans).padStart(2, '0')}`,
+        left: 'center',
+        top: 0,
+        textStyle: { color: '#e8ecf4', fontSize: 13 }
+      }
+    };
+    chart.setOption(option);
+  },
+
+  // 双色球红球概率Top10
+  renderSsqRedTop(data) {
+    const chart = this.init('chartSsqRedTop');
+    if (!chart || !data || !data.length) {
+      if (chart) chart.setOption({ ...this.baseOption(), title: { text: '暂无数据', left: 'center', top: 'center', textStyle: { color: '#64748b', fontSize: 13 } } });
+      return;
+    }
+    const sorted = [...data].sort((a, b) => b.probability - a.probability).slice(0, 10);
+    const option = {
+      ...this.baseOption(),
+      grid: { left: '5%', right: '10%', bottom: '5%', top: '10%', containLabel: true },
+      xAxis: { type: 'value', name: '概率', axisLabel: { color: '#94a3b8' } },
+      yAxis: {
+        type: 'category',
+        data: sorted.map(d => String(d.number).padStart(2, '0')).reverse(),
+        axisLabel: { color: '#94a3b8', fontSize: 12 }
+      },
+      series: [{
+        type: 'bar',
+        data: sorted.map(d => d.probability).reverse(),
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+            { offset: 0, color: '#06b6d4' }, { offset: 1, color: '#3b82f6' }
+          ]),
+          borderRadius: [0, 6, 6, 0]
+        },
+        label: { show: true, position: 'right', color: '#e8ecf4', fontSize: 11, formatter: p => p.value.toFixed(4) }
+      }]
+    };
+    chart.setOption(option);
+  },
+
+  // 双色球蓝球概率Top5
+  renderSsqBlueTop(data) {
+    const chart = this.init('chartSsqBlueTop');
+    if (!chart || !data || !data.length) {
+      if (chart) chart.setOption({ ...this.baseOption(), title: { text: '暂无数据', left: 'center', top: 'center', textStyle: { color: '#64748b', fontSize: 13 } } });
+      return;
+    }
+    const sorted = [...data].sort((a, b) => b.probability - a.probability).slice(0, 5);
+    const option = {
+      ...this.baseOption(),
+      grid: { left: '5%', right: '10%', bottom: '5%', top: '10%', containLabel: true },
+      xAxis: { type: 'value', name: '概率', axisLabel: { color: '#94a3b8' } },
+      yAxis: {
+        type: 'category',
+        data: sorted.map(d => String(d.number).padStart(2, '0')).reverse(),
+        axisLabel: { color: '#94a3b8', fontSize: 12 }
+      },
+      series: [{
+        type: 'bar',
+        data: sorted.map(d => d.probability).reverse(),
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+            { offset: 0, color: '#8b5cf6' }, { offset: 1, color: '#a855f7' }
+          ]),
+          borderRadius: [0, 6, 6, 0]
+        },
+        label: { show: true, position: 'right', color: '#e8ecf4', fontSize: 11, formatter: p => p.value.toFixed(4) }
+      }]
+    };
+    chart.setOption(option);
   }
 };

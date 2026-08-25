@@ -124,11 +124,31 @@ backtest:
 
 # ---------- 输出配置 ----------
 output:
-  n_groups: 4                # 输出4组
+  n_groups: 2                # 输出2组
   groups:
     A: "模型共识组"
     B: "彭湃强化组"
-    C: "冷态拓展组"
-    D: "探索组"
   result_dir: "results"
   log_dir: "logs"
+
+# ---------- 双色球模块配置 ----------
+ssq:
+  enabled: true
+  red_range: [1, 33]        # 红球 01-33
+  red_count: 6              # 红球选6个
+  blue_range: [1, 16]       # 蓝球 01-16
+  blue_count: 1             # 蓝球选1个
+  db_path: "data/processed/pmsf_dlt.db"  # 共用数据库（ssq_history表）
+  raw_dir: "data/raw"
+  # 彭湃双色球核心参数
+  pairs_sum: 34             # 恒值34配对
+  main_transition:          # 主过渡号（固定）
+    single: 31              # 单期线
+    double: 13              # 双期线
+  anchor_num: 33            # 独立边界过渡号
+  entanglement_min_lift: 1.25  # 有效纠缠热组Lift阈值
+  rebound_lambda: 0.35      # 隔期返点指数衰减系数
+  rebound_orders: 5         # 返点阶数1-5
+  point_cycle_count: 3      # 点位周期计数（3次=小周期）
+  n_simulations: 20000      # 蒙特卡洛模拟次数
+  n_groups: 2               # 输出2组

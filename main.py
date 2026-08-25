@@ -304,7 +304,7 @@ class PMSFSystem:
             print("[优化] 候选不足，使用结构过滤结果")
             safe_candidates = filtered[:2000] if len(filtered) >= 200 else filtered
 
-        # 4. 为4组分别构建概率偏置并优化
+        # 4. 为2组分别构建概率偏置并优化
         self.optimized_groups = []
 
         # --- A组：模型共识组（纯概率最大化）---
@@ -323,24 +323,6 @@ class PMSFSystem:
             history_combos, exclude_groups=[group_a]
         )
         self.optimized_groups.append(group_b)
-
-        # --- C组：冷态拓展组（冷号+遗漏大+回补）---
-        print("[优化] C组 - 冷态拓展组（冷号回补导向）...")
-        cold_probs = self._cold_expansion_probs()
-        group_c = self._optimize_group(
-            safe_candidates, cold_probs, "C",
-            history_combos, exclude_groups=[group_a, group_b]
-        )
-        self.optimized_groups.append(group_c)
-
-        # --- D组：探索组（与A组最大差异+中等概率）---
-        print("[优化] D组 - 探索组（低概率区域覆盖）...")
-        explore_probs = self._exploration_probs(group_a[0])
-        group_d = self._optimize_group(
-            safe_candidates, explore_probs, "D",
-            history_combos, exclude_groups=[group_a, group_b, group_c]
-        )
-        self.optimized_groups.append(group_d)
 
         print(f"  优化完成，输出 {len(self.optimized_groups)} 组")
 

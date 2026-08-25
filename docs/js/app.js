@@ -56,6 +56,7 @@ const PMSFApp = {
     this.renderDashboard();
     this.renderHistory();
     this.renderPrediction();
+    this.renderSsq();
     this.renderModel();
     this.renderReport();
     this.renderRuntime();
@@ -446,6 +447,156 @@ const PMSFApp = {
         </tr>
       `).join('');
     }
+  },
+
+  // ========== 双色球模块 ==========
+  renderSsq() {
+    const s = PMSFData.ssq;
+    if (!s) {
+      document.getElementById('ssqState').textContent = '暂无数据';
+      return;
+    }
+
+    // 统计卡
+    const cs = s.current_state || {};
+    document.getElementById('ssqState').textContent = cs.state_name || cs.state || '--';
+    const probs = cs.probabilities || {};
+    document.getElementById('ssqStateProbs').textContent =
+      `A:${Math.round((probs.A || 0) * 100)}% B:${Math.round((probs.B || 0) * 100)}% C:${Math.round((probs.C || 0) * 100)}%`;
+    document.getElementById('ssqIssue').textContent = s.target_issue || '--';
+    document.getElementById('ssqTime').textContent = (s.generate_time || '').slice(0, 16) || '--';
+    const rl = s.rules || {};
+    document.getElementById('ssqTransition').textContent =
+      rl.main_transition != null ? String(rl.main_transition).padStart(2, '0') : '--';
+    document.getElementById('ssqSubTransition').textContent =
+      `副过渡: ${(rl.sub_transitions || []).map(n => String(n).padStart(2, '0')).join(',') || '--'}`;
+    document.getElementById('ssqHotGroups').textContent =
+      (rl.hot_groups || []).length ? (rl.hot_groups || []).map(g => `组${g}`).join(',') : '无';
+
+    // 九转连环图
+    if (window.PMSFCharts && PMSFCharts.renderJiuzhuan) {
+      PMSFCharts.renderJiuzhuan(s);
+    }
+
+    // 最新2组推荐
+    this.renderSsqPrediction(s);
+
+    // 恒值34配对组
+    this.renderSsqPairGroups(s);
+
+    // 概率图表
+    if (window.PMSFCharts) {
+      PMSFCharts.renderSsqRedTop(s.top10_reds || []);
+      PMSFCharts.renderSsqBlueTop(s.top5_blues || []);
+    }
+
+    // 规则信号
+    this.renderSsqRules(s);
+  },
+
+  renderSsqPrediction(s) {
+    const container = document.getElementById('ssqPredictionDetail');
+    if (!container) return;
+    container.innerHTML = (s.groups || []).map(g => {
+      const struct = g.structure || {};
+      return `
+        <div class="prediction-group" style="margin-bottom:14px;">
+          <div class="group-header">
+            <div class="group-label">
+              <span class="tag tag-a">${g.label}组</span>
+              ${g.name}
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">${g.description || ''}</p>
+          <div class="group-balls">
+            ${PMSFData.formatBalls(g.front, 'front')}
+            <div class="divider"></div>
+            <span class="ball ball-back">${String(g.blue).padStart(2, '0')}</span>
+          </div>
+          <div class="group-meta">
+            <span class="meta-item">${struct.odd_even || ''}</span>
+            <span class="meta-item">${struct.big_small || ''}</span>
+            <span class="meta-item">三区 ${struct.zone || ''}</span>
+            <span class="meta-item">和值 ${struct.sum || ''}</span>
+            <span class="meta-item">跨度 ${struct.span || ''}</span>
+          </div>
+        </div>
+      `;
+    }).join('') || '<div style="color:var(--text-muted);text-align:center;padding:20px;">暂无预测数据</div>';
+  },
+
+  renderSsqPairGroups(s) {
+    const container = document.getElementById('ssqPairGroups');
+    if (!container) return;
+    const groups = s.rules?.pair_groups || [];
+    const hotGroups = new Set(s.rules?.hot_groups || []);
+    const mainTrans = s.rules?.main_transition;
+    const anchor = s.rules?.anchor_num;
+
+    let html = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">';
+    groups.forEach((pair, idx) => {
+      const isHot = hotGroups.has(idx);
+      const borderColor = isHot ? 'var(--accent-red)' : 'var(--border)';
+      html += `
+        <div style="border:1px solid ${borderColor};border-radius:8px;padding:10px;text-align:center;background:${isHot ? 'rgba(239,68,68,0.08)' : 'var(--bg-secondary)'};">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">${isHot ? '🔥 热组' : '组' + idx}</div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px;">
+            <span class="ball ball-front">${pair[0]}</span>
+            <span style="color:var(--text-muted);">+</span>
+            <span class="ball ball-front">${pair[1]}</span>
+          </div>
+          <div style="font-size:11px;color:var(--accent-green);font-weight:600;">= 34</div>
+        </div>
+      `;
+    });
+    // 独立过渡号
+    html += `
+      <div style="border:1px solid var(--accent-cyan);border-radius:8px;padding:10px;text-align:center;background:rgba(6,182,212,0.08);">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">独立边界过渡号</div>
+        <div style="display:flex;align-items:center;justify-content:center;">
+          <span class="ball ball-front">${String(anchor).padStart(2, '0')}</span>
+        </div>
+        <div style="font-size:11px;color:var(--accent-cyan);font-weight:600;">${mainTrans === anchor ? '★ 主过渡号' : ''}</div>
+      </div>`;
+    html += '</div>';
+    container.innerHTML = html;
+  },
+
+  renderSsqRules(s) {
+    const container = document.getElementById('ssqRulesDetail');
+    if (!container) return;
+    const rl = s.rules || {};
+    const topRebound = (rl.top_rebound || []).slice(0, 8)
+      .map(x => `${String(x[0]).padStart(2, '0')}(权${x[1]})`).join(', ') || '--';
+    const cs = s.current_state || {};
+    container.innerHTML = `
+      <div class="grid grid-3" style="gap:14px;">
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:14px;">
+          <div style="font-size:12px;color:var(--accent-cyan);font-weight:600;margin-bottom:8px;">🧭 隔期双线公理</div>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">本期属于<b>${rl.line === 'single' ? '单期线（奇数期号）' : '双期线（偶数期号）'}</b>，仅使用同线历史期数分析，禁止跨线混看。</p>
+        </div>
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:14px;">
+          <div style="font-size:12px;color:var(--accent-cyan);font-weight:600;margin-bottom:8px;">🔱 过渡号双枢纽</div>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">主过渡号：<b>${String(rl.main_transition).padStart(2, '0')}</b>（${rl.line === 'single' ? '单期线固定' : '双期线固定'}）<br>副过渡号（动态）：<b>${(rl.sub_transitions || []).map(n => String(n).padStart(2, '0')).join(', ') || '--'}</b></p>
+        </div>
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:14px;">
+          <div style="font-size:12px;color:var(--accent-cyan);font-weight:600;margin-bottom:8px;">↩️ 隔期返点Top</div>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">1-5阶指数衰减(λ=0.35)加权：<br><b>${topRebound}</b></p>
+        </div>
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:14px;">
+          <div style="font-size:12px;color:var(--accent-cyan);font-weight:600;margin-bottom:8px;">🔗 组内纠缠</div>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">有效纠缠热组（Lift≥1.25）：<b>${(rl.hot_groups || []).length ? rl.hot_groups.map(g => '组' + g).join(', ') : '当前无'}</b></p>
+        </div>
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:14px;">
+          <div style="font-size:12px;color:var(--accent-cyan);font-weight:600;margin-bottom:8px;">🔄 蓝代红 / 蓝补红</div>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">蓝球出号等价于对应红球点位计数，带动同号红球组别开出；已计入各号码概率修正。</p>
+        </div>
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:14px;">
+          <div style="font-size:12px;color:var(--accent-cyan);font-weight:600;margin-bottom:8px;">🎯 点位周期</div>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">短期累计≥3次=小周期完成，热点组数：<b>${cs.hot_group_count ?? '--'}</b>；冷尾数回补信号：<b>${cs.cold_tail_count ?? '--'}</b>个</p>
+        </div>
+      </div>
+    `;
   },
 
   showError() {

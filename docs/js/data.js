@@ -6,6 +6,7 @@ const PMSFData = {
   stats: null,
   report: null,
   runtime: null,
+  ssq: null,
 
   async loadAll() {
     const results = await Promise.allSettled([
@@ -14,7 +15,8 @@ const PMSFData = {
       this.loadJSON('data/latest_prediction.json'),
       this.loadJSON('data/stats.json'),
       this.loadJSON('data/report.json'),
-      this.loadJSON('data/runtime.json')
+      this.loadJSON('data/runtime.json'),
+      this.loadJSON('data/ssq_latest.json')
     ]);
 
     this.history = results[0].status === 'fulfilled' ? results[0].value : [];
@@ -23,6 +25,7 @@ const PMSFData = {
     this.stats = results[3].status === 'fulfilled' ? results[3].value : null;
     this.report = results[4].status === 'fulfilled' ? results[4].value : null;
     this.runtime = results[5].status === 'fulfilled' ? results[5].value : null;
+    this.ssq = results[6].status === 'fulfilled' ? results[6].value : null;
 
     return this;
   },

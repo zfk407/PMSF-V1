@@ -1,9 +1,7 @@
 """
-4组输出生成器
+2组输出生成器
 A组 - 模型共识组：最高概率
 B组 - 彭湃强化组：规则匹配最高
-C组 - 冷态拓展组：捕捉状态转换
-D组 - 探索组：防止模型过拟合
 """
 import numpy as np
 import pandas as pd
@@ -13,25 +11,22 @@ import json
 
 
 class OutputGenerator:
-    """4组输出生成器"""
+    """2组输出生成器"""
 
     GROUP_NAMES = {
         "A": "模型共识组",
-        "B": "彭湃强化组",
-        "C": "冷态拓展组",
-        "D": "探索组"
+        "B": "彭湃强化组"
     }
 
     GROUP_DESCRIPTIONS = {
         "A": "多模型融合概率最高，稳定性最强",
-        "B": "彭湃规则匹配度最高，双线/纠缠/配对强化",
-        "C": "捕捉冷态拓展与状态转换，冷号回补导向",
-        "D": "探索性组合，防止模型过拟合，覆盖低概率区域"
+        "B": "彭湃规则匹配度最高，双线/纠缠/配对强化"
     }
 
     def __init__(self, config: dict):
         self.cfg = config
         self.result_dir = config["output"]["result_dir"]
+        self.n_groups = config["output"].get("n_groups", 2)
         os.makedirs(self.result_dir, exist_ok=True)
 
     def generate(self, optimized_groups: list, fused_probs: dict,
@@ -49,9 +44,9 @@ class OutputGenerator:
         target_issue: 目标期号
         返回: 完整输出报告
         """
-        # 确保有4组
+        # 确保有n_groups组
         groups = []
-        for i in range(4):
+        for i in range(self.n_groups):
             if i < len(optimized_groups):
                 front, back, fitness = optimized_groups[i]
             else:
@@ -79,7 +74,7 @@ class OutputGenerator:
             "disclaimer": "本系统基于历史数据统计分析，彩票开奖为独立随机事件，结果仅供参考，不构成投注建议。"
         }
 
-        labels = ["A", "B", "C", "D"]
+        labels = ["A", "B"]
         for i, (label, group) in enumerate(zip(labels, groups)):
             front = group["front"]
             back = group["back"]
@@ -136,9 +131,9 @@ class OutputGenerator:
             lines.append(f"    {i:2d}. {item['number']:02d}  概率: {item['probability']:.4f}")
         lines.append("")
 
-        # 4组
+        # 2组
         lines.append("-" * 60)
-        lines.append("  推荐组合 (4组5+2):")
+        lines.append("  推荐组合 (2组5+2):")
         lines.append("-" * 60)
         for group in output["groups"]:
             lines.append("")

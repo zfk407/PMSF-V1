@@ -1,11 +1,13 @@
-name: PMSF-V1 数据自动更新
+name: ZHIHUI-DLT 数据自动更新
 
 # 触发条件：
-# 1. 定时触发：大乐透开奖日（周一/三/六）北京时间 21:30（UTC 13:30）
+# 1. 定时触发：大乐透开奖日（周一/三/六）北京时间 21:30（UTC 13:30）；
+#    双色球开奖日（周二/四/日）北京时间 21:15（UTC 13:15）
 # 2. 手动触发
 on:
   schedule:
-    - cron: '30 13 * * 1,3,6'  # 周一、三、六 21:30 北京时间
+    - cron: '30 13 * * 1,3,6'  # 大乐透: 周一、三、六 21:30 北京时间
+    - cron: '15 13 * * 2,4,0'  # 双色球: 周二、四、日 21:15 北京时间
   workflow_dispatch:  # 手动触发
 
 permissions:
@@ -28,10 +30,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install numpy pandas scipy scikit-learn pyyaml tqdm networkx requests beautifulsoup4 lxml xgboost catboost hmmlearn
 
-      - name: 运行数据更新脚本
+      - name: 运行大乐透更新脚本
         run: |
           cd docs
-          python scripts/update_data.py || echo "更新脚本执行完成（含警告）"
+          python scripts/update_data.py || echo "大乐透更新脚本执行完成（含警告）"
+        env:
+          TZ: Asia/Shanghai
+
+      - name: 运行双色球更新脚本
+        run: |
+          python ssq_main.py || echo "双色球更新脚本执行完成（含警告）"
         env:
           TZ: Asia/Shanghai
 

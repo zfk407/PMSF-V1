@@ -38,6 +38,7 @@
     <button class="tab-btn active" data-tab="dashboard">📊 仪表盘</button>
     <button class="tab-btn" data-tab="history">📋 历史数据</button>
     <button class="tab-btn" data-tab="prediction">🔮 预测中心</button>
+    <button class="tab-btn" data-tab="ssq">🎱 双色球</button>
     <button class="tab-btn" data-tab="model">🤖 模型介绍</button>
     <button class="tab-btn" data-tab="report">📑 详细报告</button>
     <button class="tab-btn" data-tab="runtime">⚙️ 系统运行</button>
@@ -186,7 +187,66 @@
     </div>
   </section>
 
-  <!-- Tab4: 模型介绍 -->
+  <!-- Tab4: 双色球 -->
+  <section class="tab-content" id="tab-ssq">
+    <div class="grid grid-4" style="margin-bottom:20px;">
+      <div class="stat-card">
+        <div class="stat-label">双色球状态</div>
+        <div class="stat-value" id="ssqState" style="font-size:20px;">--</div>
+        <div class="stat-sub" id="ssqStateProbs">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">最新预测期号</div>
+        <div class="stat-value" id="ssqIssue">--</div>
+        <div class="stat-sub" id="ssqTime">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">主过渡号</div>
+        <div class="stat-value" id="ssqTransition">--</div>
+        <div class="stat-sub" id="ssqSubTransition">--</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">热点配对组</div>
+        <div class="stat-value" id="ssqHotGroups" style="font-size:20px;">--</div>
+        <div class="stat-sub">Lift≥1.25 纠缠热组</div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">🌀</span> 九转连环图（彭湃双色球核心）</div>
+        <div class="chart-container" id="chartJiuzhuan" style="height:520px;"></div>
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:8px;">
+          <p>33个红球按<strong>恒值34配对</strong>（16组）环形分布，中心为主过渡号枢纽。连线表示配对/纠缠/拓展关系，节点颜色深浅代表组热度。</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🎯</span> 最新2组推荐（红6+蓝1）</div>
+        <div id="ssqPredictionDetail"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">🔗</span> 恒值34配对组</div>
+        <div id="ssqPairGroups"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📊</span> 红球概率Top10 & 蓝球概率Top5</div>
+        <div class="grid grid-2">
+          <div class="chart-container" id="chartSsqRedTop"></div>
+          <div class="chart-container" id="chartSsqBlueTop"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">🔮</span> 彭湃规则信号</div>
+      <div id="ssqRulesDetail"></div>
+    </div>
+  </section>
+
+  <!-- Tab5: 模型介绍 -->
   <section class="tab-content" id="tab-model">
     <div class="card">
       <div class="card-title"><span class="icon">🏗️</span> 五层架构总览</div>
