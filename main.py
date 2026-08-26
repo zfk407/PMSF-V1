@@ -226,6 +226,8 @@ class PMSFSystem:
         # HSMM状态概率作为模型输入
         model_outputs["hsmm"] = self._state_to_number_probs()
         model_outputs["bayesian"] = self._bayesian_prior()
+        # 同线150期频率分量 (深挖回测最优单信号)
+        model_outputs["freq_line"] = self._line_frequency_probs()
 
         # 彭湃规则修正
         rule_bias = self._pengpai_rule_bias()
@@ -250,27 +252,51 @@ class PMSFSystem:
         return self.ms.get_regime_number_probs(self.current_state)
 
     def _bayesian_prior(self) -> dict:
-        """贝叶斯先验：基于长期频率"""
+        """贝叶斯先验：基于同线100期频率(实证: 同线>全量)"""
         front_cols = ["front01", "front02", "front03", "front04", "front05"]
+        line = self.dual_line.get_line_for_issue(self._pengpai_target_issue())
+        line_df = self.dual_line.split(self.data)[line]
         counts = {n: 0 for n in range(1, 36)}
-        for _, row in self.data.tail(100).iterrows():
+        for _, row in line_df.tail(100).iterrows():
             for c in front_cols:
                 counts[int(row[c])] += 1
         total = sum(counts.values())
-        return {k: v / total for k, v in counts.items()}
+        return {k: (v / total if total else 1/35) for k, v in counts.items()}
+
+    def _pengpai_target_issue(self) -> str:
+        """推断目标期号(下一期=最新期+1)"""
+        latest = self.data["issue"].iloc[-1]
+        try:
+            year = int(latest[:2]); seq = int(latest[2:])
+            nxt = seq + 1
+            if nxt > 150:
+                nxt = 1; year += 1
+            return f"{year:02d}{nxt:03d}"
+        except Exception:
+            return str(latest)
 
     def _pengpai_rule_bias(self) -> dict:
-        """彭湃规则修正偏置"""
-        bias = {n: 1.0 for n in range(1, 36)}
-        # 双线偏置：根据当前期号线型，调整对应线的活跃号码
-        # 纠缠偏置：关系网络中心性高的号码加权
-        for num in range(1, 36):
-            entanglement = self.number_graph.get_entanglement_score(num)
-            if self.current_state == "A":  # 纠缠热态：高纠缠加权
-                bias[num] *= 1 + 0.2 * np.tanh(entanglement * 5)
-            elif self.current_state == "C":  # 拓展态：低纠缠（冷号）加权
-                bias[num] *= 1 + 0.2 * (1 - np.tanh(entanglement * 5))
-        return bias
+        """彭湃规则修正偏置 (2026-08 深挖回测实证校准版)
+        ★核心结论: 同线150期等权频率是Top10命中最强单信号(1.60),
+        任何乘法修正(遗漏回补/3阶返点/纠缠/三态调制)都会降低命中
+        (实测组合1.60→1.54, 三态B态-0.42/C态-0.65, 纠缠-0.03~-0.07)。
+        因此本偏置中性化: 不再扰动频率主导的排序, 仅作为架构保留。
+        有效信息已通过 freq_line 分量(同线150频率)注入融合。
+        """
+        return {n: 1.0 for n in range(1, 36)}
+
+    def _line_frequency_probs(self) -> dict:
+        """同线150期等权频率概率 (深挖回测最优单信号 Top10=1.60)"""
+        front_cols = ["front01", "front02", "front03", "front04", "front05"]
+        target = self._pengpai_target_issue()
+        line = self.dual_line.get_line_for_issue(target)
+        line_df = self.dual_line.split(self.data)[line]
+        counts = {n: 0 for n in range(1, 36)}
+        for _, row in line_df.tail(150).iterrows():
+            for c in front_cols:
+                counts[int(row[c])] += 1
+        total = sum(counts.values())
+        return {k: (v / total if total else 1 / 35) for k, v in counts.items()}
 
     def run_optimization_layer(self) -> list:
         """第五层：组合优化层（4组独立优化目标）"""

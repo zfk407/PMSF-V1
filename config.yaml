@@ -81,15 +81,17 @@ probability_models:
     family: "gaussian"
   # 融合权重（初始值，回测后动态调整）
   fusion_weights:
-    # 经2026-08 逐思路walk-forward回测校准(80期):
-    # 有效: xgboost(频率/状态特征) hsmm(三态偏置) bayesian(校正)
-    # 无效/降权: gnn(图网络) tft(时序) catboost
+    # 经2026-08 深挖walk-forward回测校准(100期):
+    # 有效: xgboost(频率/状态特征) freq_line(同线150频率=最强单信号1.60) hsmm bayesian
+    # 无效/大幅降权: gnn(图网络) tft(时序) catboost
+    # 三态贝叶斯修正已温和化(fusion.py), 彭湃规则修正已中性化(main.py)
     xgboost: 0.28
-    catboost: 0.16
-    gnn: 0.10
-    tft: 0.10
-    hsmm: 0.18
-    bayesian: 0.13
+    catboost: 0.15
+    gnn: 0.05
+    tft: 0.05
+    hsmm: 0.15
+    bayesian: 0.15
+    freq_line: 0.12
     pengpai_rule: 0.05
 
 # ---------- 第五层：组合优化 ----------

@@ -1,0 +1,79 @@
+{
+ "freq_window": {
+  "freq20": 1.36,
+  "freq30": 1.49,
+  "freq50": 1.38,
+  "freq80": 1.49,
+  "freq100": 1.48,
+  "freq150": 1.32,
+  "freq200": 1.45,
+  "freq_line20": 1.28,
+  "freq_line30": 1.39,
+  "freq_line50": 1.54,
+  "freq_line80": 1.49,
+  "freq_line100": 1.53,
+  "freq_line150": 1.6,
+  "freq_line200": 1.45,
+  "freq_exp": 1.34,
+  "freq_exp_line": 1.24,
+  "random": 1.47
+ },
+ "state_B": {
+  "n": 100,
+  "hot": 0.296,
+  "mid": 0.426,
+  "cold": 0.278
+ },
+ "miss_bucket_0-2": {
+  "total": 1306,
+  "hit": 191,
+  "rate": 0.14624808575803983
+ },
+ "miss_bucket_3-5": {
+  "total": 812,
+  "hit": 106,
+  "rate": 0.13054187192118227
+ },
+ "miss_bucket_6-10": {
+  "total": 777,
+  "hit": 104,
+  "rate": 0.13384813384813385
+ },
+ "miss_bucket_11-20": {
+  "total": 490,
+  "hit": 80,
+  "rate": 0.16326530612244897
+ },
+ "miss_bucket_21+": {
+  "total": 115,
+  "hit": 19,
+  "rate": 0.16521739130434782
+ },
+ "reb_stage1": {
+  "n": 500,
+  "hit": 71,
+  "rate": 0.142
+ },
+ "reb_stage2": {
+  "n": 500,
+  "hit": 63,
+  "rate": 0.126
+ },
+ "reb_stage3": {
+  "n": 500,
+  "hit": 78,
+  "rate": 0.156
+ },
+ "reb_stage4": {
+  "n": 500,
+  "hit": 67,
+  "rate": 0.134
+ },
+ "reb_stage5": {
+  "n": 500,
+  "hit": 72,
+  "rate": 0.144
+ },
+ "line_same": 1.53,
+ "line_cross": 1.29
+}

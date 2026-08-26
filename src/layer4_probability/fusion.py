@@ -18,12 +18,13 @@ class ProbabilityFusion:
         self.cfg = config
         weights = config["probability_models"]["fusion_weights"]
         self.weights = {
-            "xgboost": weights.get("xgboost", 0.25),
-            "catboost": weights.get("catboost", 0.20),
-            "gnn": weights.get("gnn", 0.15),
-            "tft": weights.get("tft", 0.15),
-            "hsmm": weights.get("hsmm", 0.10),
-            "bayesian": weights.get("bayesian", 0.10),
+            "xgboost": weights.get("xgboost", 0.28),
+            "catboost": weights.get("catboost", 0.15),
+            "gnn": weights.get("gnn", 0.05),
+            "tft": weights.get("tft", 0.05),
+            "hsmm": weights.get("hsmm", 0.15),
+            "bayesian": weights.get("bayesian", 0.15),
+            "freq_line": weights.get("freq_line", 0.12),
             "pengpai_rule": weights.get("pengpai_rule", 0.05)
         }
         self.front_nums = list(range(1, 36))
@@ -83,11 +84,12 @@ class ProbabilityFusion:
         P(号码|状态) = P(状态|号码) * P(号码) / P(状态)
         简化：根据状态概率对号码概率做加权调整
         """
-        # 状态对号码类型的偏向
+        # 状态对号码类型的偏向 (2026-08 深挖回测校准: 原始幅度过大,
+        # B态/ C态下冷号加权实际负效(B-0.42/C-0.65), 已温和化)
         state_bias = {
-            "A": {"hot": 1.3, "cold": 0.7},   # 纠缠热态：热号升，冷号降
-            "B": {"hot": 0.8, "cold": 1.1},   # 终止冷态：热号降
-            "C": {"hot": 0.9, "cold": 1.4}    # 拓展回补态：冷号大幅升
+            "A": {"hot": 1.08, "cold": 0.96},   # 纠缠热态：热号略升
+            "B": {"hot": 0.99, "cold": 1.02},   # 终止冷态：近中性(实证热号仍偏多)
+            "C": {"hot": 1.02, "cold": 1.04}    # 拓展回补态：仅极温和冷号倾向
         }
 
         result = {}
