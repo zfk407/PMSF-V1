@@ -61,9 +61,12 @@ class WalkForwardBacktester:
                     predicted_state = result.get("state")
 
                     # 记录指标
+                    # 修复: 用Top-K作为预测集合, 避免35全集导致coverage/exact_hit恒为100%/5
+                    top_k = self.cfg["backtest"].get("top_k", 10)
+                    predicted_set = list(predicted_ranked)[:top_k]
                     self.metrics.record(
                         issue=issue,
-                        predicted_numbers=predicted_ranked,
+                        predicted_numbers=predicted_set,
                         actual_numbers=actual_front,
                         predicted_state=predicted_state,
                         actual_state=None,
