@@ -2,7 +2,7 @@
   "system": "ZHIHUI-DLT",
   "version": "1.0",
   "target_issue": "26118",
-  "generate_time": "2026-10-15 02:13:33",
+  "generate_time": "2026-10-16 01:52:14",
   "current_state": {
     "state": "B",
     "state_name": "终止冷态",
@@ -26,10 +26,10 @@
       ],
       "front_str": "04 09 13 23 35",
       "back": [
-        4,
-        5
+        3,
+        9
       ],
-      "back_str": "04 05",
+      "back_str": "03 09",
       "fitness": -4.825092093491908,
       "probability_score": -17.29429592232747,
       "structure": {
@@ -61,10 +61,10 @@
       ],
       "front_str": "02 09 11 23 29",
       "back": [
-        9,
-        11
+        3,
+        4
       ],
-      "back_str": "09 11",
+      "back_str": "03 04",
       "fitness": -4.833039394881931,
       "probability_score": -17.144995844381523,
       "structure": {
@@ -139,8 +139,8 @@
           35
         ],
         "back": [
-          4,
-          5
+          3,
+          9
         ],
         "risks": []
       },
@@ -154,8 +154,8 @@
           29
         ],
         "back": [
-          9,
-          11
+          3,
+          4
         ],
         "risks": []
       }
