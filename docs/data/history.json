@@ -49298,5 +49298,39 @@
     "big_small": "4大1小",
     "zone": "0-2-2-1",
     "tail": "0-3-8-8-9"
+  },
+  {
+    "issue": "26124",
+    "date": "2026-10-31",
+    "front01": 12,
+    "front02": 14,
+    "front03": 18,
+    "front04": 22,
+    "front05": 27,
+    "back01": 1,
+    "back02": 9,
+    "sum_front": 93,
+    "span_front": 15,
+    "odd_even": "1奇4偶",
+    "big_small": "3大2小",
+    "zone": "0-3-2-0",
+    "tail": "2-2-4-7-8"
+  },
+  {
+    "issue": "26125",
+    "date": "2026-11-02",
+    "front01": 12,
+    "front02": 13,
+    "front03": 23,
+    "front04": 25,
+    "front05": 29,
+    "back01": 7,
+    "back02": 10,
+    "sum_front": 102,
+    "span_front": 17,
+    "odd_even": "4奇1偶",
+    "big_small": "3大2小",
+    "zone": "0-2-2-1",
+    "tail": "2-3-3-5-9"
   }
 ]
