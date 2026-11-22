@@ -2,7 +2,7 @@
   "system": "ZHIHUI-DLT",
   "version": "1.0",
   "target_issue": "26134",
-  "generate_time": "2026-11-22 04:13:33",
+  "generate_time": "2026-11-23 04:27:51",
   "current_state": {
     "state": "C",
     "state_name": "拓展回补态",
@@ -61,10 +61,10 @@
       ],
       "front_str": "02 09 11 26 29",
       "back": [
-        9,
-        12
+        4,
+        6
       ],
-      "back_str": "09 12",
+      "back_str": "04 06",
       "fitness": -4.938858333981915,
       "probability_score": -16.804126035855333,
       "structure": {
@@ -154,8 +154,8 @@
           29
         ],
         "back": [
-          9,
-          12
+          4,
+          6
         ],
         "risks": []
       }
